@@ -23,7 +23,7 @@ This is written using Python 2.7 and only has 3 dependencies, Flask, lxml and re
  * Cache requests
 
 ## Hosting
-I host using Google App Engine, it's free and you can directly upload the src just remove the following code from from `main.py`
+I host using Google App Engine, it's free and you can directly upload the src just remove the following code from `main.py`
 ```
 if __name__ == '__main__':
     app.run(debug=True, host='localhost')

@@ -10,7 +10,6 @@ def parse_stats(page, region, battletag):
     data["player"]["battletag"] = battletag
     data["player"]["region"] = region
     data["player"]["level"] = int(parsed.find(".//div[@class='player-level']/div").text)
-    data["player"]["rank"] = None # Soon
 
     # Try and fetch Comp Rank
     hasrank = parsed.findall(".//div[@class='competitive-rank']/div")
@@ -31,6 +30,7 @@ def parse_stats(page, region, battletag):
                 data["player"]["rank"] = val
                 break
         else:
+            # Unknown Rank
             data["player"]["rank"] = None
 
     stats = parsed.xpath(".//div[@data-group-id='stats' and @data-category-id='0x02E00000FFFFFFFF']")
@@ -72,7 +72,7 @@ def parse_stats(page, region, battletag):
                     average_stats[name.replace("_average", "")] = amount
                 else:
                     game_stats[name] = amount
-        #Manually add KPD
+        # Manually add KPD
         game_stats["kpd"] = round(game_stats["eliminations"] / game_stats["deaths"], 2)
 
         # Featured Stats

@@ -1,3 +1,4 @@
+# IDs correlate to Image IDs used for the Border Images
 data = {
 "0x0250000000000918": 0,
 "0x0250000000000919": 0,
