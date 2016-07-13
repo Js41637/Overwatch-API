@@ -1,0 +1,185 @@
+<html>
+<head>
+  <title>Overwatch API</title>
+  <style>
+    body {
+      background-color: rgb(245,245,245);
+      font-family: sans-serif;
+      padding: 5px;
+    }
+    h1 {
+      margin-bottom: 7px;
+    }
+    h2, h3, h4 {
+      margin: 12px 0 7px 0;
+    }
+    p {
+      margin: 2px;
+    }
+    .code-block {
+      color: #1c1c1c;
+      background-color: rgba(207, 207, 207, 0.8);
+      border-radius: 3px;
+      display: inline-block;
+      padding: 2px;
+      border: 1px solid #898989;
+      margin: 3px;
+      font-family: monospace;
+    }
+    .code-block.full {
+      display: block;
+      white-space: pre-wrap;
+    }
+    h4 {
+      font-size: 18px;
+    }
+    .method {
+      margin: 10px 0;
+    }
+    .method h4 {
+      margin: 4px 2px;
+    }
+    .method-response {
+      margin-left: 25px;
+      font-weight: bold;
+    }
+    ul {
+      margin: 5px 0;
+    }
+    .md {
+      font-weight: normal
+    }
+    .int, .bool {
+      color: blue;
+    }
+    .string {
+      color: green;
+    }
+    .undef {
+      color: gray;
+    }
+  </style>
+</head>
+<body>
+  <div id="header">
+    <h1>Overwatch API</h1>
+    <p>Returns an Overwatch Players Stats
+  </div>
+
+  <h2>API Endpoints</h2>
+  <div id="methods">
+    <div class="method">
+      <h4>User Stats: <div class="code-block">/api/u/&lt;user&gt;/stats</div></h4>
+      <div class="method-details">
+        <p><b>Returns a users QuickPlay and Competitive stats (if any)</b></p>
+        <p><b>Params:</b></p>
+        <ul>
+          <li><div class="code-block">&lt;user&gt;</div> - users battletag, case sensitive. e.g. Apples-1234</li>
+          <li><div class="code-block">?region=</div> - optional region of user (us, eu, cn, kr) - if not specified it will attempt to find it</li>
+        </ul>
+      </div>
+      <p><b>Method Response: <a class="show-response" href="#" onclick="toggleResponse(0)">Show</a></b></p>
+      <div class="method-response code-block full" style="display: none">
+      {
+        ok: <span class="md bool">true</span>,
+        data: {
+          player: {
+            battletag: <span class="md string">'Apples-1234'</span>,
+            region: <span class="md string">'us'</span>,
+            level: <span class="md int">5</span>,
+            rank: <span class="md undef">null</span>,
+            comprank: <span class="md undef">null</span>
+          },
+          stats: {
+            competitive: <span class="md undef">null</span>,
+            quickplay: {
+              featured_stats: [{
+                  avg: <span class="md int">1333</span>,
+                  name: <span class="md string">"healing done"</span>,
+                  value: <span class="md int">815570</span>
+                }, {
+                  avg: <span class="md string">"02:07"</span>,
+                  name: <span class="md string">"time spent on fire"</span>,
+                  value: <span class="md string">"21:38:20"</span>
+                }, {
+                  ...
+                }
+              ],
+              game_stats: {
+                cards: <span class="md int">285</span>,
+                damage_done: <span class="md int">4061587</span>,
+                damage_done_most_in_game: <span class="md int">21420</span>,
+                deaths: <span class="md int">4137</span>,
+                defensive_assists: <span class="md int">163</span>,
+                ...
+              },
+              overall_stats: {
+                games: <span class="md int">612</span>,
+                losses: <span class="md int">301</span>,
+                win_rate: <span class="md int">50.8</span>,
+                wins: <span class="md int">311</span>
+              }
+            }
+          }
+        }
+      }
+      </div>
+    </div>
+    <hr>
+    <div class="method">
+      <h4>User Heroes: <div class="code-block">/api/u/&lt;user&gt;/heroes</div></h4>
+      <div class="method-details">
+        <p><b>Returns all heroes and their playtime sorted by playtime for both QuickPlay and Competitive (if any)</b></p>
+        <p><b>Params:</b></p>
+        <ul>
+          <li><div class="code-block">&lt;user&gt;</div> - users battletag, case sensitive. e.g. Apples-1234</li>
+          <li><div class="code-block">?region=</div> - optional region of user (us, eu, cn, kr) - if not specified it will attempt to find it</li>
+        </ul>
+      </div>
+      <p><b>Method Response: <a class="show-response" href="#" onclick="toggleResponse(1)">Show</a></b></p>
+      <div class="method-response code-block full" style="display: none">
+      {
+        ok: <span class="md bool">true</span>,
+        data: {
+          competitive: [ ],
+          quickplay: [{
+            extended: <span class="md string">"/hero/pharah"</span>,
+            name: <span class="md string">"Pharah"</span>,
+            time: <span class="md string">"16 hours"</span>
+          }, {
+            extended: <span class="md string">"/hero/mercy"</span>,
+            name: <span class="md string">"Mercy"</span>,
+            time: <span class="md string">"15 hours"</span>
+          }, {
+            extended: <span class="md string">"/hero/roadhog"</span>,
+            name: <span class="md string">"Roadhog"</span>,
+            time: <span class="md string">"3 hours"</span>
+          }, {
+            extended: <span class="md string">"/hero/tracer"</span>,
+            name: <span class="md string">"Tracer"</span>,
+            time: <span class="md string">"2 hours"</span>
+          }, {
+            ...
+          }]
+        }
+      }
+      </div>
+    </div>
+  </div>
+  <script>
+    function toggleResponse(id) {
+        var el = document.querySelectorAll('.method-response')[id]
+        var btn = document.querySelectorAll('.show-response')[id]
+        var isHidden = el.style.display == 'none'
+
+        if (isHidden) {
+          el.style.display = 'block'
+          btn.innerText = 'Hide'
+        } else {
+          el.style.display = 'none'
+          btn.innerText = 'Show'
+        }
+    }
+  </script>
+</body>
+</html>
