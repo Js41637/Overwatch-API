@@ -15,12 +15,10 @@ def root():
 @bp.route('/u/<user>/stats')
 def get_user_stats(user):
     data = utils.find_user(user, request.values.get("region", None))
-
     if not data:
         abort(404)
 
     page, region, battletag = data[0]
-
     stats = parsers.parse_stats(page, region, battletag)
 
     return return_data(stats)
@@ -28,12 +26,10 @@ def get_user_stats(user):
 @bp.route('/u/<user>/heroes')
 def get_user_heroes(user):
     data = utils.find_user(user, request.values.get("region", None))
-
     if not data:
         abort(404)
 
     page, region, battletag = data[0]
-
     stats = parsers.parse_heroes(page, region, battletag)
 
     return return_data(stats)
