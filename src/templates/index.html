@@ -69,12 +69,13 @@
   <h2>API Endpoints</h2>
   <div id="methods">
     <div class="method">
-      <h4>User Stats: <div class="code-block">/api/u/&lt;user&gt;/stats</div></h4>
+      <h4>User Stats: <div class="code-block">/api/u/&lt;user&gt;/stats/&lt;type&gt;</div></h4>
       <div class="method-details">
-        <p><b>Returns a users QuickPlay and Competitive stats (if any)</b></p>
+        <p><b>Returns a users QuickPlay and/or Competitive stats (if any)</b></p>
         <p><b>Params:</b></p>
         <ul>
           <li><div class="code-block">&lt;user&gt;</div> - users battletag, case sensitive. e.g. Apples-1234</li>
+          <li><div class="code-block">&lt;type&gt;</div> - optional type, will return only data relating to type, not sending a type will default to <div class="code-block">both</div>, valid types are <div class="code-block">quickplay</div>, <div class="code-block">competitive</div> or <div class="code-block">both</div></li>
           <li><div class="code-block">?region=</div> - optional region of user (us, eu, cn, kr) - if not specified it will attempt to find it</li>
         </ul>
       </div>
@@ -127,12 +128,13 @@
     </div>
     <hr>
     <div class="method">
-      <h4>User Heroes: <div class="code-block">/api/u/&lt;user&gt;/heroes</div></h4>
+      <h4>User Heroes: <div class="code-block">/api/u/&lt;user&gt;/heroes/&lt;type&gt;</div></h4>
       <div class="method-details">
-        <p><b>Returns all heroes and their playtime sorted by playtime for both QuickPlay and Competitive (if any)</b></p>
+        <p><b>Returns all heroes and their playtime sorted by playtime for both QuickPlay and/or Competitive (if any)</b></p>
         <p><b>Params:</b></p>
         <ul>
           <li><div class="code-block">&lt;user&gt;</div> - users battletag, case sensitive. e.g. Apples-1234</li>
+          <li><div class="code-block">&lt;type&gt;</div> - optional type, will return only data relating to type, not sending a type will default to <div class="code-block">both</div>, valid types are <div class="code-block">quickplay</div>, <div class="code-block">competitive</div> or <div class="code-block">both</div></li>
           <li><div class="code-block">?region=</div> - optional region of user (us, eu, cn, kr) - if not specified it will attempt to find it</li>
         </ul>
       </div>

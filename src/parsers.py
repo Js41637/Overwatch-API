@@ -2,10 +2,15 @@ from lxml import etree
 import utils
 import ranks
 
-def parse_stats(page, region, battletag):
-    parsed = etree.HTML(page)
+def parse_stats(page, region, battletag, version):
+    if version == 'both':
+        data = {"player": {}, "stats": { "quickplay": {}, "competitive": {}}}
+    elif version == 'quickplay':
+        data = {"player": {}, "stats": { "quickplay": {}}}
+    elif version == 'competitive':
+        data = {"player": {}, "stats": { "competitive": {}}}
 
-    data = {"player": {}, "stats": { "quickplay": {}, "competitive": {}}}
+    parsed = etree.HTML(page)
 
     data["player"]["battletag"] = battletag
     data["player"]["region"] = region
@@ -37,10 +42,18 @@ def parse_stats(page, region, battletag):
 
     #Stats contains both Quick and Comp, if no comp, set it to Null
     if len(stats) != 2:
-        data["stats"]["competitive"] = None
+        if version == 'competitive':
+            return {"error": True, "msg": "No competitive stats"}
+        elif version == 'both':
+            data["stats"]["competitive"] = None
 
     # Go through both QuickPlay and Competetive stats
     for i, item in enumerate(stats):
+        if version == 'competitive' and i == 0:
+            continue
+        elif version == 'quickplay' and i == 1:
+            continue
+
         stat_groups = item
 
         overall_stats = {}
@@ -87,27 +100,34 @@ def parse_stats(page, region, battletag):
 
     return data
 
-def parse_heroes(page, region, battletag):
+def parse_heroes(page, region, battletag, version):
+    if version == 'both':
+        data = {"quickplay": [], "competitive": []}
+    elif version == 'quickplay':
+        data = {"quickplay": []}
+    elif version == 'competitive':
+        data = {"competitive": []}
+
     parsed = etree.HTML(page)
-
-    data = {"quickplay": {}, "competitive": {}}
-
     stats = parsed.xpath(".//div[@data-category-id='overwatch.guid.0x0860000000000021']")
 
     for i, item in enumerate(stats):
+        if version == 'competitive' and i == 0:
+            continue
+        elif version == 'quickplay' and i == 1:
+            continue
+
         built_heroes = []
-        nostats = False
         heroes = item.xpath(".//div[@class='bar-text']")
         for ii, hero in enumerate(heroes):
             htime = hero.find(".//div[@class='description']").text
             # If the first hero has no playtime then we can assume that none have been played
             # and that they haven't played comp mode so we will ignore all the rest
             if htime == '--':
-                if nostats:
-                    continue
-                elif ii == 0 and i == 1:
-                    nostats = True
-                    continue
+                if ii == 0 and i == 1:
+                    if version == 'competitive':
+                        return {"error": True, "msg": "No competitive stats"}
+                    break
                 else:
                     htime = '0'
             hname = hero.find(".//div[@class='title']").text
