@@ -15,6 +15,7 @@ def parse_stats(page, region, battletag, version):
     data["player"]["battletag"] = battletag
     data["player"]["region"] = region
     data["player"]["level"] = int(parsed.find(".//div[@class='player-level']/div").text)
+    data["player"]["avatar"] = parsed.find(".//img[@class='player-portrait']").attrib['src']
 
     # Try and fetch Comp Rank
     hasrank = parsed.findall(".//div[@class='competitive-rank']/div")
