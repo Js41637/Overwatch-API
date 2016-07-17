@@ -1,6 +1,7 @@
 from flask import Blueprint, make_response, request, jsonify, abort
 import utils
 import parsers
+import cache
 
 bp = Blueprint("routes", __name__)
 
@@ -18,12 +19,18 @@ def get_user_stats(user, version = 'both'):
     if version != 'quickplay' and version != 'competitive' and version != 'both':
         return return_error('Invalid Type')
 
+    cached = cache.get(user + version)
+    if cached is not None:
+        return return_data(cached)
+
     data = utils.find_user(user, request.values.get("region", None))
     if not data:
         abort(404)
 
     page, region, battletag = data[0]
     stats = parsers.parse_stats(page, region, battletag, version)
+
+    cache.set(user + version, stats, 600)
 
     try:
         if stats["error"]:
@@ -37,12 +44,18 @@ def get_user_heroes(user, version = 'both'):
     if version != 'quickplay' and version != 'competitive' and version != 'both':
         return return_error('Invalid Type')
 
+    cached = cache.get(user + version)
+    if cached is not None:
+        return return_data(cached)
+
     data = utils.find_user(user, request.values.get("region", None))
     if not data:
         abort(404)
 
     page, region, battletag = data[0]
     stats = parsers.parse_heroes(page, region, battletag, version)
+
+    cache.set(user + version, stats, 600)
 
     try:
         if stats["error"]:
