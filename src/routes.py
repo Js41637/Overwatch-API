@@ -19,7 +19,7 @@ def get_user_stats(user, version = 'both'):
     if version != 'quickplay' and version != 'competitive' and version != 'both':
         return return_error('Invalid Type')
 
-    cached = cache.get(user + version)
+    cached = cache.get(user + version + 'stats')
     if cached is not None:
         return return_data(cached)
 
@@ -30,7 +30,7 @@ def get_user_stats(user, version = 'both'):
     page, region, battletag = data[0]
     stats = parsers.parse_stats(page, region, battletag, version)
 
-    cache.set(user + version, stats, 600)
+    cache.set(user + version + 'stats', stats, 600)
 
     try:
         if stats["error"]:
@@ -44,7 +44,7 @@ def get_user_heroes(user, version = 'both'):
     if version != 'quickplay' and version != 'competitive' and version != 'both':
         return return_error('Invalid Type')
 
-    cached = cache.get(user + version)
+    cached = cache.get(user + version + 'heroes')
     if cached is not None:
         return return_data(cached)
 
@@ -55,7 +55,7 @@ def get_user_heroes(user, version = 'both'):
     page, region, battletag = data[0]
     stats = parsers.parse_heroes(page, region, battletag, version)
 
-    cache.set(user + version, stats, 600)
+    cache.set(user + version + 'heroes', stats, 600)
 
     try:
         if stats["error"]:
