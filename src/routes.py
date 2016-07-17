@@ -6,29 +6,19 @@ bp = Blueprint("routes", __name__)
 
 @bp.errorhandler(404)
 def not_found(error):
-    return make_response(jsonify({'ok': False, 'error': 'profile not found'}), 404)
+    return make_response(return_error('profile not found'), 404)
 
 @bp.route('/', methods=['GET'])
 def root():
     return "Hello, nufin to see here"
 
 @bp.route('/u/<user>/stats/')
-def get_user_stats(user):
-    data = utils.find_user(user, request.values.get("region", None))
-    if not data:
-        abort(404)
-
-    page, region, battletag = data[0]
-    stats = parsers.parse_stats(page, region, battletag, 'both')
-
-    return return_data(stats)
-
 @bp.route('/u/<user>/stats/<version>')
-def get_user_stats_type(user, version):
-    if version == 'quickplay' or version == 'competitive' or version == 'both':
-        data = utils.find_user(user, request.values.get("region", None))
-    else:
-        return jsonify({'ok': False, 'data': 'Invalid Type'})
+def get_user_stats(user, version = 'both'):
+    if version != 'quickplay' and version != 'competitive' and version != 'both':
+        return return_error('Invalid Type')
+
+    data = utils.find_user(user, request.values.get("region", None))
     if not data:
         abort(404)
 
@@ -42,26 +32,12 @@ def get_user_stats_type(user, version):
         return return_data(stats)
 
 @bp.route('/u/<user>/heroes/')
-def get_user_heroes(user):
-    data = utils.find_user(user, request.values.get("region", None))
-    if not data:
-        abort(404)
-
-    page, region, battletag = data[0]
-    stats = parsers.parse_heroes(page, region, battletag, 'both')
-
-    try:
-        if stats["error"]:
-            return return_error(stats["msg"])
-    except:
-        return return_data(stats)
-
 @bp.route('/u/<user>/heroes/<version>')
-def get_user_heroes_type(user, version):
-    if version == 'quickplay' or version == 'competitive' or version == 'both':
-        data = utils.find_user(user, request.values.get("region", None))
-    else:
-        return jsonify({'ok': False, 'data': 'Invalid Type'})
+def get_user_heroes(user, version = 'both'):
+    if version != 'quickplay' and version != 'competitive' and version != 'both':
+        return return_error('Invalid Type')
+
+    data = utils.find_user(user, request.values.get("region", None))
     if not data:
         abort(404)
 
