@@ -5,18 +5,21 @@ import cache
 
 bp = Blueprint("routes", __name__)
 
+
 @bp.errorhandler(404)
 def not_found(error):
     return make_response(return_error('profile not found'), 404)
+
 
 @bp.route('/', methods=['GET'])
 def root():
     return "Hello, nufin to see here"
 
+
 @bp.route('/u/<user>/stats')
 @bp.route('/u/<user>/stats/')
 @bp.route('/u/<user>/stats/<version>')
-def get_user_stats(user, version = 'both'):
+def get_user_stats(user, version='both'):
     if version != 'quickplay' and version != 'competitive' and version != 'both':
         return return_error('Invalid Type')
 
@@ -37,10 +40,11 @@ def get_user_stats(user, version = 'both'):
         return return_error(stats['msg'])
     return return_data(stats)
 
+
 @bp.route('/u/<user>/heroes')
 @bp.route('/u/<user>/heroes/')
 @bp.route('/u/<user>/heroes/<version>')
-def get_user_heroes(user, version = 'both'):
+def get_user_heroes(user, version='both'):
     if version != 'quickplay' and version != 'competitive' and version != 'both':
         return return_error('Invalid Type')
 
@@ -61,10 +65,11 @@ def get_user_heroes(user, version = 'both'):
         return return_error(stats['msg'])
     return return_data(stats)
 
+
 @bp.route('/u/<user>/hero')
 @bp.route('/u/<user>/hero/')
 @bp.route('/u/<user>/hero/<hero>')
-def get_user_hero(user, hero = None):
+def get_user_hero(user, hero=None):
     if hero is None:
         return return_error("No hero specified")
 
@@ -85,8 +90,10 @@ def get_user_hero(user, hero = None):
         return return_error(stats['msg'])
     return return_data(stats)
 
+
 def return_data(data):
     return jsonify({'ok': True, 'data': data})
 
+
 def return_error(data):
-        return jsonify({'ok': False, 'error': data})
+    return jsonify({'ok': False, 'error': data})

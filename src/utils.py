@@ -2,6 +2,7 @@ import requests
 
 PAGEURL = "https://playoverwatch.com/en-us/career/pc/{region}/{tag}"
 
+
 def find_user(battletag, region):
     if not region:
         regions = ["us", "eu", "cn", "kr"]
@@ -16,6 +17,7 @@ def find_user(battletag, region):
     else:
         return None
 
+
 def get_user_page(battletag, region):
     """
     Downloads a users playoverwatch.com page
@@ -29,14 +31,18 @@ def get_user_page(battletag, region):
 
     return (page, region, battletag)
 
+
 def get_page(url):
     r = requests.get(url)
     if r.status_code != 200:
         return None
     return r.text
 
-#Attempts to parse input as an int or return the input
+
 def parseInt(input):
+    """
+    Attempts to parse an int or return original
+    """
     a = input.replace(",", "")
     try:
         return float(a)
