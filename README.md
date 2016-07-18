@@ -1,9 +1,9 @@
 # Overwatch Python API
-API for fetching Overwatch Stats
+Crappy API for fetching Overwatch Stats
 
 Original and core code from https://github.com/SunDwarf/OWAPI
 
-I wrote my own version in Python 2.7 so I could run it on Windows and make some of my own changes.
+I wrote my own version in Python 2.7 so I could run it on Windows and make some of my own changes, i've got no idea what i'm doing.
 
 API hosts it's own docs on `/`
 
@@ -20,7 +20,7 @@ This is written using Python 2.7 and only has 3 dependencies, Flask, lxml and re
 ```python main.py```
 
 ## Todo
- * Cache requests
+ * I dunno
 
 ## Hosting
 I host using Google App Engine, it's free and you can directly upload the src just remove the following code from `main.py`
