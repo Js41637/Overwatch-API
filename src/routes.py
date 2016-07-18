@@ -2,6 +2,7 @@ from flask import Blueprint, make_response, request, jsonify, abort
 import utils
 import parsers
 import cache
+import datastore
 
 bp = Blueprint("routes", __name__)
 
@@ -57,7 +58,7 @@ def get_user_heroes(user, version='both'):
         abort(404)
 
     page, region, battletag = data[0]
-    stats = parsers.parse_hero(page, region, battletag, hero)
+    stats = parsers.parse_heroes(page, region, battletag, version)
 
     cache.set(user + version + 'heroes', stats, 600)
 
@@ -69,9 +70,15 @@ def get_user_heroes(user, version='both'):
 @bp.route('/u/<user>/hero')
 @bp.route('/u/<user>/hero/')
 @bp.route('/u/<user>/hero/<hero>')
-def get_user_hero(user, hero=None):
+@bp.route('/u/<user>/hero/<hero>/')
+@bp.route('/u/<user>/hero/<hero>/<version>')
+def get_user_hero(user, hero=None, version='both'):
     if hero is None:
         return return_error("No hero specified")
+    if hero not in datastore.heroes:
+        return return_error("Invalid hero")
+    if version != 'quickplay' and version != 'competitive' and version != 'both':
+        return return_error('Invalid Type')
 
     cached = cache.get(user + hero + 'hero')
     if cached is not None:
@@ -82,7 +89,7 @@ def get_user_hero(user, hero=None):
         abort(404)
 
     page, region, battletag = data[0]
-    #stats = parsers.parse_heroes(page, region, battletag, version)
+    stats = parsers.parse_hero(page, region, battletag, hero, version)
 
     cache.set(user + hero + 'hero', stats, 600)
 

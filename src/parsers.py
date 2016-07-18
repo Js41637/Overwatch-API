@@ -1,6 +1,6 @@
 from lxml import etree
 import utils
-import ranks
+import datastore
 
 def parse_stats(page, region, battletag, version):
     if version == 'both':
@@ -31,7 +31,7 @@ def parse_stats(page, region, battletag, version):
     except IndexError:
         data["player"]["rank"] = 0
     else:
-        for key, val in ranks.data.items():
+        for key, val in datastore.ranks.items():
             if key in bg_image:
                 data["player"]["rank"] = val
                 break
@@ -61,7 +61,6 @@ def parse_stats(page, region, battletag, version):
         game_stats = {}
         featured_stats = []
 
-        death_box = stat_groups[4]
         game_box = stat_groups[6]
 
         # Fetch Overall stats
@@ -140,5 +139,91 @@ def parse_heroes(page, region, battletag, version):
             data["quickplay"] = built_heroes
         else:
             data["competitive"] = built_heroes
+
+    return data
+
+def parse_hero(page, region, battletag, hero, version):
+    if version == 'both':
+        data = {"quickplay": {}, "competitive": {}}
+    elif version == 'quickplay':
+        data = {"quickplay": {}}
+    elif version == 'competitive':
+        data = {"competitive": {}}
+
+    heroid = datastore.heroes[hero]
+
+    parsed = etree.HTML(page)
+    stats = parsed.xpath(".//div[@data-group-id='stats' and @data-category-id='{0}']".format(heroid))
+
+    #Stats contains both Quick and Comp, if no comp, set it to Null
+    if len(stats) != 2:
+        if version == 'competitive':
+            return {"error": True, "msg": "No competitive stats"}
+        elif version == 'both':
+            data["competitive"] = None
+
+    # Go through both QuickPlay and Competetive stats
+    for i, item in enumerate(stats):
+        if version == 'competitive' and i == 0:
+            continue
+        elif version == 'quickplay' and i == 1:
+            continue
+
+        hero_stats = {}
+        general_stats = {}
+        featured_stats = []
+        overall_stats = {}
+
+        stat_groups = item
+        hero_box = stat_groups[0]
+        game_box = stat_groups[7]
+
+        # Fetch Overall stats
+        wins = int(game_box.xpath(".//text()[. = 'Games Won']/../..")[0][1].text.replace(",", ""))
+        g = game_box.xpath(".//text()[. = 'Games Played']/../..")
+        games = int(g[0][1].text.replace(",", ""))
+
+        overall_stats["wins"] = wins
+        overall_stats["win_rate"] = round(((float(wins) / games) * 100), 1)
+        overall_stats["losses"] = games - wins
+        overall_stats["games"] = games
+
+        # Fetch Game Stats
+        average_stats = {}
+        for hstat in hero_box.findall(".//tbody/tr"):
+            name, value = hstat[0].text.lower().replace(" ", "_").replace("_-_", "_"), hstat[1].text
+            amount = utils.parseInt(value)
+            if 'average' in name.lower():
+                # Don't include average stats in the general_stats, use them for the featured stats section
+                average_stats[name.replace("_average", "")] = amount
+            else:
+                hero_stats[name] = amount
+
+        for subbox in stat_groups[1:]:
+            stats = subbox.findall(".//tbody/tr")
+            for stat in stats:
+                name, value = stat[0].text.lower().replace(" ", "_").replace("_-_", "_"), stat[1].text
+                amount = utils.parseInt(value)
+                if 'average' in name.lower():
+                    # Don't include average stats in the general_stats, use them for the featured stats section
+                    average_stats[name.replace("_average", "")] = amount
+                else:
+                    general_stats[name] = amount
+        # Manually add KPD
+        general_stats["kpd"] = round(general_stats["eliminations"] / general_stats["deaths"], 2)
+
+        # Featured Stats
+        for astat in average_stats:
+            if average_stats[astat] != 0:
+                if astat in hero_stats:
+                    val = hero_stats[astat]
+                else:
+                    val = general_stats[astat]
+                featured_stats.append({ "name": astat.replace("_", " "), "avg": average_stats[astat], "value": val})
+
+        if i == 0:
+            data["quickplay"] = {"featured_stats": featured_stats, "general_stats": general_stats, "overall_stats": overall_stats, "hero_stats": hero_stats}
+        else:
+            data["competitive"] = {"featured_stats": featured_stats, "general_stats": general_stats, "overall_stats": overall_stats, "hero_stats": hero_stats}
 
     return data
