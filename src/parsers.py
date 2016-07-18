@@ -85,10 +85,11 @@ def parse_stats(page, region, battletag, version):
                     average_stats[name.replace("_average", "")] = amount
                 else:
                     game_stats[name] = amount
+
         # Manually add KPD
         game_stats["kpd"] = round(game_stats["eliminations"] / game_stats["deaths"], 2)
 
-        # Featured Stats
+        # Generate Featured Stats
         for astat in average_stats:
             if average_stats[astat] != 0:
                 featured_stats.append({ "name": astat.replace("_", " "), "avg": average_stats[astat], "value": game_stats[astat]})
@@ -174,9 +175,13 @@ def parse_hero(page, region, battletag, hero, version):
         featured_stats = []
         overall_stats = {}
 
-        stat_groups = item
-        hero_box = stat_groups[0]
-        game_box = stat_groups[7]
+        hero_box = item[0]
+        # Find the Game Box as it can change location
+        for i, subbox in enumerate(item[1:]):
+            title = subbox.find(".//span[@class='stat-title']").text
+            if title == 'Game':
+                game_box = item[i + 1]
+                break
 
         # Fetch Overall stats
         wins = int(game_box.xpath(".//text()[. = 'Games Won']/../..")[0][1].text.replace(",", ""))
@@ -188,7 +193,7 @@ def parse_hero(page, region, battletag, hero, version):
         overall_stats["losses"] = games - wins
         overall_stats["games"] = games
 
-        # Fetch Game Stats
+        # Fetch Hero Specific Stats
         average_stats = {}
         for hstat in hero_box.findall(".//tbody/tr"):
             name, value = hstat[0].text.lower().replace(" ", "_").replace("_-_", "_"), hstat[1].text
@@ -199,7 +204,8 @@ def parse_hero(page, region, battletag, hero, version):
             else:
                 hero_stats[name] = amount
 
-        for subbox in stat_groups[1:]:
+        # Fetch General Hero Stats
+        for subbox in item[1:]:
             stats = subbox.findall(".//tbody/tr")
             for stat in stats:
                 name, value = stat[0].text.lower().replace(" ", "_").replace("_-_", "_"), stat[1].text
@@ -209,10 +215,11 @@ def parse_hero(page, region, battletag, hero, version):
                     average_stats[name.replace("_average", "")] = amount
                 else:
                     general_stats[name] = amount
+
         # Manually add KPD
         general_stats["kpd"] = round(general_stats["eliminations"] / general_stats["deaths"], 2)
 
-        # Featured Stats
+        # Generate Featured Stats
         for astat in average_stats:
             if average_stats[astat] != 0:
                 if astat in hero_stats:
