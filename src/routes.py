@@ -13,6 +13,7 @@ def not_found(error):
 def root():
     return "Hello, nufin to see here"
 
+@bp.route('/u/<user>/stats')
 @bp.route('/u/<user>/stats/')
 @bp.route('/u/<user>/stats/<version>')
 def get_user_stats(user, version = 'both'):
@@ -32,12 +33,11 @@ def get_user_stats(user, version = 'both'):
 
     cache.set(user + version + 'stats', stats, 600)
 
-    try:
-        if stats["error"]:
-            return return_error(stats["msg"])
-    except:
-        return return_data(stats)
+    if 'error' in stats and stats['error']:
+        return return_error(stats['msg'])
+    return return_data(stats)
 
+@bp.route('/u/<user>/heroes')
 @bp.route('/u/<user>/heroes/')
 @bp.route('/u/<user>/heroes/<version>')
 def get_user_heroes(user, version = 'both'):
@@ -53,15 +53,37 @@ def get_user_heroes(user, version = 'both'):
         abort(404)
 
     page, region, battletag = data[0]
-    stats = parsers.parse_heroes(page, region, battletag, version)
+    stats = parsers.parse_hero(page, region, battletag, hero)
 
     cache.set(user + version + 'heroes', stats, 600)
 
-    try:
-        if stats["error"]:
-            return return_error(stats["msg"])
-    except:
-        return return_data(stats)
+    if 'error' in stats and stats['error']:
+        return return_error(stats['msg'])
+    return return_data(stats)
+
+@bp.route('/u/<user>/hero')
+@bp.route('/u/<user>/hero/')
+@bp.route('/u/<user>/hero/<hero>')
+def get_user_hero(user, hero = None):
+    if hero is None:
+        return return_error("No hero specified")
+
+    cached = cache.get(user + hero + 'hero')
+    if cached is not None:
+        return return_data(cached)
+
+    data = utils.find_user(user, request.values.get("region", None))
+    if not data:
+        abort(404)
+
+    page, region, battletag = data[0]
+    #stats = parsers.parse_heroes(page, region, battletag, version)
+
+    cache.set(user + hero + 'hero', stats, 600)
+
+    if 'error' in stats and stats['error']:
+        return return_error(stats['msg'])
+    return return_data(stats)
 
 def return_data(data):
     return jsonify({'ok': True, 'data': data})
