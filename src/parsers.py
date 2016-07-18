@@ -177,10 +177,10 @@ def parse_hero(page, region, battletag, hero, version):
 
         hero_box = item[0]
         # Find the Game Box as it can change location
-        for i, subbox in enumerate(item[1:]):
+        for ii, subbox in enumerate(item[1:]):
             title = subbox.find(".//span[@class='stat-title']").text
             if title == 'Game':
-                game_box = item[i + 1]
+                game_box = item[ii + 1]
                 break
 
         # Fetch Overall stats
