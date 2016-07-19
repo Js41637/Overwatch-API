@@ -221,7 +221,7 @@ def parse_hero(page, region, battletag, hero, version):
 
         # Generate Featured Stats
         for astat in average_stats:
-            if average_stats[astat] != 0:
+            if astat in general_stats or astat in hero_stats:
                 if astat in hero_stats:
                     val = hero_stats[astat]
                 else:
