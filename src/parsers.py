@@ -156,6 +156,9 @@ def parse_hero(page, region, battletag, hero, version):
     parsed = etree.HTML(page)
     stats = parsed.xpath(".//div[@data-group-id='stats' and @data-category-id='{0}']".format(heroid))
 
+    if len(stats) == 0:
+        return {"error": True, "msg": "User has no stats for this hero"}
+
     #Stats contains both Quick and Comp, if no comp, set it to Null
     if len(stats) != 2:
         if version == 'competitive':
@@ -164,48 +167,68 @@ def parse_hero(page, region, battletag, hero, version):
             data["competitive"] = None
 
     # Go through both QuickPlay and Competetive stats
-    for i, item in enumerate(stats):
-        if version == 'competitive' and i == 0:
+    for statsIndex, item in enumerate(stats):
+        if version == 'competitive' and statsIndex == 0:
             continue
-        elif version == 'quickplay' and i == 1:
+        elif version == 'quickplay' and statsIndex == 1:
             continue
 
         hero_stats = {}
         general_stats = {}
         featured_stats = []
         overall_stats = {}
+        average_stats = {}
 
-        hero_box = item[0]
+        hbtitle = item[0].find(".//span[@class='stat-title']").text
+        if hbtitle == 'Hero Specific':
+            hero_box = item[0]
+            startingPos = 1
+        else:
+            hero_box = None
+            startingPos = 0
+
         # Find the Game Box as it can change location
-        for ii, subbox in enumerate(item[1:]):
+        for itemIndex, subbox in enumerate(item[startingPos:]):
             title = subbox.find(".//span[@class='stat-title']").text
             if title == 'Game':
-                game_box = item[ii + 1]
+                game_box = item[itemIndex + 1]
                 break
+        else:
+            game_box = None
 
         # Fetch Overall stats
-        wins = int(game_box.xpath(".//text()[. = 'Games Won']/../..")[0][1].text.replace(",", ""))
-        g = game_box.xpath(".//text()[. = 'Games Played']/../..")
-        games = int(g[0][1].text.replace(",", ""))
-
-        overall_stats["wins"] = wins
-        overall_stats["win_rate"] = round(((float(wins) / games) * 100), 1)
-        overall_stats["losses"] = games - wins
-        overall_stats["games"] = games
+        if game_box is not None:
+            wins = game_box.xpath(".//text()[. = 'Games Won']/../..")
+            games = game_box.xpath(".//text()[. = 'Games Played']/../..")
+            if len(wins) != 0:
+                overall_stats["wins"] = int(wins[0][1].text.replace(",", ""))
+            else:
+                overall_stats["wins"] = None
+            if len(games) != 0:
+                overall_stats["games"] = int(games[0][1].text.replace(",", ""))
+            else:
+                overall_stats["games"] = None
+            if len(wins) != 0 and len(games) != 0:
+                overall_stats["win_rate"] = round(((float(wins) / games) * 100), 1)
+                overall_stats["losses"] = games - wins
+            else:
+                overall_stats.update({"win_rate": None, "losses": None})
+        else:
+            overall_stats = {'wins': None, 'win_rate': None, 'losses': None, 'games': None}
 
         # Fetch Hero Specific Stats
-        average_stats = {}
-        for hstat in hero_box.findall(".//tbody/tr"):
-            name, value = hstat[0].text.lower().replace(" ", "_").replace("_-_", "_"), hstat[1].text
-            amount = utils.parseInt(value)
-            if 'average' in name.lower():
-                # Don't include average stats in the general_stats, use them for the featured stats section
-                average_stats[name.replace("_average", "")] = amount
-            else:
-                hero_stats[name] = amount
+        if hero_box is not None:
+            for hstat in hero_box.findall(".//tbody/tr"):
+                name, value = hstat[0].text.lower().replace(" ", "_").replace("_-_", "_"), hstat[1].text
+                amount = utils.parseInt(value)
+                if 'average' in name.lower():
+                    # Don't include average stats in the general_stats, use them for the featured stats section
+                    average_stats[name.replace("_average", "")] = amount
+                else:
+                    hero_stats[name] = amount
 
         # Fetch General Hero Stats
-        for subbox in item[1:]:
+        for subbox in item[startingPos:]:
             stats = subbox.findall(".//tbody/tr")
             for stat in stats:
                 name, value = stat[0].text.lower().replace(" ", "_").replace("_-_", "_"), stat[1].text
@@ -217,7 +240,10 @@ def parse_hero(page, region, battletag, hero, version):
                     general_stats[name] = amount
 
         # Manually add KPD
-        general_stats["kpd"] = round(general_stats["eliminations"] / general_stats["deaths"], 2)
+        if 'eliminations' in general_stats and 'deaths' in general_stats:
+            general_stats["kpd"] = round(general_stats["eliminations"] / general_stats["deaths"], 2)
+        else:
+            general_stats["kpd"] = None
 
         # Generate Featured Stats
         for astat in average_stats:
@@ -228,7 +254,7 @@ def parse_hero(page, region, battletag, hero, version):
                     val = general_stats[astat]
                 featured_stats.append({ "name": astat.replace("_", " "), "avg": average_stats[astat], "value": val})
 
-        if i == 0:
+        if statsIndex == 0:
             data["quickplay"] = {"featured_stats": featured_stats, "general_stats": general_stats, "overall_stats": overall_stats, "hero_stats": hero_stats}
         else:
             data["competitive"] = {"featured_stats": featured_stats, "general_stats": general_stats, "overall_stats": overall_stats, "hero_stats": hero_stats}
