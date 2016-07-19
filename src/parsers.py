@@ -50,9 +50,7 @@ def parse_stats(page, region, battletag, version):
 
     # Go through both QuickPlay and Competetive stats
     for i, item in enumerate(stats):
-        if version == 'competitive' and i == 0:
-            continue
-        elif version == 'quickplay' and i == 1:
+        if (version == 'competitive' and i == 0) or (version == 'quickplay' and i == 1):
             continue
 
         stat_groups = item
@@ -113,9 +111,7 @@ def parse_heroes(page, region, battletag, version):
     stats = parsed.xpath(".//div[@data-category-id='overwatch.guid.0x0860000000000021']")
 
     for i, item in enumerate(stats):
-        if version == 'competitive' and i == 0:
-            continue
-        elif version == 'quickplay' and i == 1:
+        if (version == 'competitive' and i == 0) or (version == 'quickplay' and i == 1):
             continue
 
         built_heroes = []
@@ -168,9 +164,7 @@ def parse_hero(page, region, battletag, hero, version):
 
     # Go through both QuickPlay and Competetive stats
     for statsIndex, item in enumerate(stats):
-        if version == 'competitive' and statsIndex == 0:
-            continue
-        elif version == 'quickplay' and statsIndex == 1:
+        if (version == 'competitive' and statsIndex == 0) or (version == 'quickplay' and statsIndex == 1):
             continue
 
         hero_stats = {}
@@ -200,17 +194,11 @@ def parse_hero(page, region, battletag, hero, version):
         if game_box is not None:
             wins = game_box.xpath(".//text()[. = 'Games Won']/../..")
             games = game_box.xpath(".//text()[. = 'Games Played']/../..")
-            if len(wins) != 0:
-                overall_stats["wins"] = int(wins[0][1].text.replace(",", ""))
-            else:
-                overall_stats["wins"] = None
-            if len(games) != 0:
-                overall_stats["games"] = int(games[0][1].text.replace(",", ""))
-            else:
-                overall_stats["games"] = None
-            if len(wins) != 0 and len(games) != 0:
-                overall_stats["win_rate"] = round(((float(wins) / games) * 100), 1)
-                overall_stats["losses"] = games - wins
+            overall_stats["wins"] = int(wins[0][1].text.replace(",", "")) if len(wins) != 0 else None
+            overall_stats["games"] = int(games[0][1].text.replace(",", "")) if len(games) != 0 else None
+            if overall_stats["wins"] is not None and overall_stats["games"] is not None:
+                overall_stats["win_rate"] = round(((float(overall_stats["wins"]) / overall_stats["games"]) * 100), 1)
+                overall_stats["losses"] = overall_stats["games"] - overall_stats["wins"]
             else:
                 overall_stats.update({"win_rate": None, "losses": None})
         else:
