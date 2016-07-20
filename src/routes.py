@@ -35,10 +35,11 @@ def get_user_stats(user, version='both'):
     page, region, battletag = data[0]
     stats = parsers.parse_stats(page, region, battletag, version)
 
-    cache.set(user + version + 'stats', stats, 1200)
-
     if 'error' in stats and stats['error']:
         return return_error(stats['msg'])
+
+    cache.set(user + version + 'stats', stats, 1200)
+
     return return_data(stats)
 
 
@@ -60,10 +61,11 @@ def get_user_heroes(user, version='both'):
     page, region, battletag = data[0]
     stats = parsers.parse_heroes(page, region, battletag, version)
 
-    cache.set(user + version + 'heroes', stats, 1200)
-
     if 'error' in stats and stats['error']:
         return return_error(stats['msg'])
+
+    cache.set(user + version + 'heroes', stats, 1200)
+
     return return_data(stats)
 
 
@@ -91,10 +93,11 @@ def get_user_hero(user, hero=None, version='both'):
     page, region, battletag = data[0]
     stats = parsers.parse_hero(page, region, battletag, hero.lower(), version)
 
-    cache.set(user + hero.lower() + version + 'hero', stats, 1200)
-
     if 'error' in stats and stats['error']:
         return return_error(stats['msg'])
+
+    cache.set(user + hero.lower() + version + 'hero', stats, 1200)
+
     return return_data(stats)
 
 
