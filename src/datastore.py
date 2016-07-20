@@ -1,29 +1,33 @@
-# IDs correlate to Image IDs used for the Border Images
+# -*- coding: utf-8 -*-
+# IDs correlate to Group IDs for each heroes stats on the page
 heroes = {
-    "reaper": "0x02E0000000000002",
-    "tracer": "0x02E0000000000003",
-    "mercy": "0x02E0000000000004",
-    "hanzo": "0x02E0000000000005",
-    "torbjorn": "0x02E0000000000006",
-    "reinhardt": "0x02E0000000000007",
-    "pharah": "0x02E0000000000008",
-    "winston": "0x02E0000000000009",
-    "widowmaker": "0x02E000000000000A",
-    "bastion": "0x02E0000000000015",
-    "symmetra": "0x02E0000000000016",
-    "zenyatta": "0x02E0000000000020",
-    "genji": "0x02E0000000000029",
-    "roadhog": "0x02E0000000000040",
-    "mccree": "0x02E0000000000042",
-    "junkrat": "0x02E0000000000065",
-    "zarya": "0x02E0000000000068",
-    "s76": "0x02E000000000006E",
-    "soldier76": "0x02E000000000006E",
-    "lucio": "0x02E0000000000079",
-    "d.va": "0x02E000000000007A",
-    "dva": "0x02E000000000007A",
-    "mei": "0x02E00000000000DD"
+    "ana":        {"id": "0x02E000000000013B", "name": "Ana"},
+    "bastion":    {"id": "0x02E0000000000015", "name": "Bastion"},
+    "d.va":       {"id": "0x02E000000000007A", "name": "D.Va"},
+    "dva":        {"id": "0x02E000000000007A", "name": "D.Va"},
+    "genji":      {"id": "0x02E0000000000029", "name": "Genji"},
+    "hanzo":      {"id": "0x02E0000000000005", "name": "Hanzo"},
+    "junkrat":    {"id": "0x02E0000000000065", "name": "Junkrat"},
+    "lucio":      {"id": "0x02E0000000000079", "name": "Lúcio"},
+    "mccree":     {"id": "0x02E0000000000042", "name": "McCree"},
+    "mei":        {"id": "0x02E00000000000DD", "name": "Mei"},
+    "mercy":      {"id": "0x02E0000000000004", "name": "Mercy"},
+    "pharah":     {"id": "0x02E0000000000008", "name": "Pharah"},
+    "reaper":     {"id": "0x02E0000000000002", "name": "Reaper"},
+    "reinhardt":  {"id": "0x02E0000000000007", "name": "Reinhardt"},
+    "roadhog":    {"id": "0x02E0000000000040", "name": "Roadhog"},
+    "s76":        {"id": "0x02E000000000006E", "name": "Soldier: 76"},
+    "soldier76":  {"id": "0x02E000000000006E", "name": "Soldier: 76"},
+    "symmetra":   {"id": "0x02E0000000000016", "name": "Symetra"},
+    "torbjorn":   {"id": "0x02E0000000000006", "name": "Torbjörn"},
+    "tracer":     {"id": "0x02E0000000000003", "name": "Tracer"},
+    "widowmaker": {"id": "0x02E000000000000A", "name": "Widowmaker"},
+    "winston":    {"id": "0x02E0000000000009", "name": "Winston"},
+    "zarya":      {"id": "0x02E0000000000068", "name": "Zarya"},
+    "zenyatta":   {"id": "0x02E0000000000020", "name": "Zenyatta"}
 }
+
+# IDs correlate to Image IDs used for the Border Images
 ranks = {
     "0x0250000000000918": 0,
     "0x0250000000000919": 0,

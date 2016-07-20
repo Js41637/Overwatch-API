@@ -75,12 +75,12 @@ def get_user_heroes(user, version='both'):
 def get_user_hero(user, hero=None, version='both'):
     if hero is None:
         return return_error("No hero specified")
-    if hero not in datastore.heroes:
+    if hero.lower() not in datastore.heroes:
         return return_error("Invalid hero")
     if version != 'quickplay' and version != 'competitive' and version != 'both':
         return return_error('Invalid Type')
 
-    cached = cache.get(user + hero + version + 'hero')
+    cached = cache.get(user + hero.lower() + version + 'hero')
     if cached is not None:
         return return_data(cached)
 
@@ -89,9 +89,9 @@ def get_user_hero(user, hero=None, version='both'):
         abort(404)
 
     page, region, battletag = data[0]
-    stats = parsers.parse_hero(page, region, battletag, hero, version)
+    stats = parsers.parse_hero(page, region, battletag, hero.lower(), version)
 
-    cache.set(user + hero + version + 'hero', stats, 1200)
+    cache.set(user + hero.lower() + version + 'hero', stats, 1200)
 
     if 'error' in stats and stats['error']:
         return return_error(stats['msg'])

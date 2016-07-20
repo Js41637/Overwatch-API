@@ -147,7 +147,9 @@ def parse_hero(page, region, battletag, hero, version):
     elif version == 'competitive':
         data = {"competitive": {}}
 
-    heroid = datastore.heroes[hero]
+    heroid = datastore.heroes[hero]["id"]
+
+    data["name"] = datastore.heroes[hero]["name"]
 
     parsed = etree.HTML(page)
     stats = parsed.xpath(".//div[@data-group-id='stats' and @data-category-id='{0}']".format(heroid))
