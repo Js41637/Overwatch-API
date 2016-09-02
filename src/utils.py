@@ -5,7 +5,7 @@ PAGEURL = "https://playoverwatch.com/en-us/career/pc/{region}/{tag}"
 
 def find_user(battletag, region):
     if not region:
-        regions = ["us", "eu", "cn", "kr"]
+        regions = ["us", "eu", "kr"]
     else:
         regions = [region]
 
