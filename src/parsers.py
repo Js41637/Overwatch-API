@@ -64,12 +64,17 @@ def parse_stats(page, region, battletag, version):
         # Fetch Overall stats
         wins = int(game_box.xpath(".//text()[. = 'Games Won']/../..")[0][1].text.replace(",", ""))
         g = game_box.xpath(".//text()[. = 'Games Played']/../..")
-        games = int(g[0][1].text.replace(",", ""))
+        if not g:
+            overall_stats["win_rate"] = None
+            overall_stats["losses"] = None
+            overall_stats["games"] = None
+        else:
+            games = int(g[0][1].text.replace(",", ""))
+            overall_stats["win_rate"] = round(((float(wins) / games)), 1)
+            overall_stats["losses"] = games - wins
+            overall_stats["games"] = games
 
         overall_stats["wins"] = wins
-        overall_stats["win_rate"] = round(((float(wins) / games) * 100), 1)
-        overall_stats["losses"] = games - wins
-        overall_stats["games"] = games
 
         # Fetch Game Stats
         average_stats = {}
@@ -90,7 +95,11 @@ def parse_stats(page, region, battletag, version):
         # Generate Featured Stats
         for astat in average_stats:
             if average_stats[astat] != 0:
-                featured_stats.append({ "name": astat.replace("_", " "), "avg": average_stats[astat], "value": game_stats[astat]})
+                if astat[:-1] in game_stats:
+                    featured_stats.append({ "name": astat.replace("_", " "), "avg": average_stats[astat], "value": game_stats[astat[:-1]]})
+                else:
+                    featured_stats.append({ "name": astat.replace("_", " "), "avg": average_stats[astat], "value": game_stats[astat]})
+
 
         if i == 0:
             data["stats"]["quickplay"] = {"featured_stats": featured_stats, "game_stats": game_stats, "overall_stats": overall_stats}
@@ -199,7 +208,7 @@ def parse_hero(page, region, battletag, hero, version):
             overall_stats["wins"] = int(wins[0][1].text.replace(",", "")) if len(wins) != 0 else None
             overall_stats["games"] = int(games[0][1].text.replace(",", "")) if len(games) != 0 else None
             if overall_stats["wins"] is not None and overall_stats["games"] is not None:
-                overall_stats["win_rate"] = round(((float(overall_stats["wins"]) / overall_stats["games"]) * 100), 1)
+                overall_stats["win_rate"] = round(((float(overall_stats["wins"]) / overall_stats["games"])), 1)
                 overall_stats["losses"] = overall_stats["games"] - overall_stats["wins"]
             else:
                 overall_stats.update({"win_rate": None, "losses": None})
