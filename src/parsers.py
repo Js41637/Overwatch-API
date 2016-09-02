@@ -62,19 +62,24 @@ def parse_stats(page, region, battletag, version):
         game_box = stat_groups[6]
 
         # Fetch Overall stats
-        wins = int(game_box.xpath(".//text()[. = 'Games Won']/../..")[0][1].text.replace(",", ""))
+        w = game_box.xpath(".//text()[. = 'Games Won']/../..")
+        if not w:
+            wins = 0
+        else:
+            wins = int(w[0][1].text.replace(",", ""))
+
         g = game_box.xpath(".//text()[. = 'Games Played']/../..")
         if not g:
-            overall_stats["win_rate"] = None
-            overall_stats["losses"] = None
-            overall_stats["games"] = None
+            wr, losses, games = None, None, None
         else:
             games = int(g[0][1].text.replace(",", ""))
-            overall_stats["win_rate"] = round(((float(wins) / games)), 1)
-            overall_stats["losses"] = games - wins
-            overall_stats["games"] = games
+            wr = round(((float(wins) / games)), 1)
+            losses = games - wins
 
         overall_stats["wins"] = wins
+        overall_stats["win_rate"] = wr
+        overall_stats["losses"] = losses
+        overall_stats["games"] = games
 
         # Fetch Game Stats
         average_stats = {}
