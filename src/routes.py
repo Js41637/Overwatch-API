@@ -16,6 +16,22 @@ def not_found(error):
 def root():
     return "Hello, nufin to see here"
 
+@bp.route('/u/<user>')
+@bp.route('/u/<user>/')
+def get_user(user):
+    cached = cache.get(user + 'info')
+    if cached is not None:
+        return return_data(cached)
+
+    data = utils.find_user(user, request.values.get("region", None))
+    if not data:
+        abort(404)
+
+    page, region, battletag = data[0]
+    stats = parsers.parse_stats('basic', page, region, battletag, None)
+
+    cache.set(user + 'info', stats, 1200)
+    return return_data(stats)
 
 @bp.route('/u/<user>/stats')
 @bp.route('/u/<user>/stats/')
@@ -33,7 +49,7 @@ def get_user_stats(user, version='both'):
         abort(404)
 
     page, region, battletag = data[0]
-    stats = parsers.parse_stats(page, region, battletag, version)
+    stats = parsers.parse_stats('full', page, region, battletag, version)
 
     if 'error' in stats and stats['error']:
         return return_error(stats['msg'])

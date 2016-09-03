@@ -2,13 +2,15 @@ from lxml import etree
 import utils
 import datastore
 
-def parse_stats(page, region, battletag, version):
+def parse_stats(mode, page, region, battletag, version):
     if version == 'both':
         data = {"player": {}, "stats": { "quickplay": {}, "competitive": {}}}
     elif version == 'quickplay':
         data = {"player": {}, "stats": { "quickplay": {}}}
     elif version == 'competitive':
         data = {"player": {}, "stats": { "competitive": {}}}
+    else:
+        data = {"player": {}}
 
     parsed = etree.HTML(page)
 
@@ -38,6 +40,9 @@ def parse_stats(page, region, battletag, version):
         else:
             # Unknown Rank
             data["player"]["rank"] = None
+
+    if mode == 'basic':
+        return data
 
     stats = parsed.xpath(".//div[@data-group-id='stats' and @data-category-id='0x02E00000FFFFFFFF']")
 
@@ -70,7 +75,7 @@ def parse_stats(page, region, battletag, version):
 
         g = game_box.xpath(".//text()[. = 'Games Played']/../..")
         if not g:
-            wr, losses, games = None, None, None
+            wr, losses, games = 0, 0, 0
         else:
             games = int(g[0][1].text.replace(",", ""))
             wr = round(((float(wins) / games)), 1)

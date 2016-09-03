@@ -93,9 +93,9 @@
             battletag: <span class="md string">'Apples-1234'</span>,
             avatar: <span class="md string">'https://blzgdapipro-a.akamaihd.net/game/unlocks/0x0250000000000BAD.png'</span>,
             region: <span class="md string">'us'</span>,
-            level: <span class="md int">5</span>,
-            rank: <span class="md undef">null</span>,
-            comprank: <span class="md undef">null</span>
+            level: <span class="md int">15</span>,
+            rank: <span class="md int">1</span>,
+            comprank: <span class="md int">2512</span>
           },
           stats: {
             competitive: <span class="md undef">null</span>,
@@ -231,6 +231,34 @@
               ...
             }]
           }
+        }
+      }
+      </div>
+    </div>
+    <hr>
+    <div class="method">
+      <h4>User Info: <div class="code-block">/api/u/&lt;user&gt;</div></h4>
+      <div class="method-details">
+        <p><b>Returns basic user info</b></p>
+        <p><b>Params:</b></p>
+        <ul>
+          <li><div class="code-block">&lt;user&gt;</div> - users battletag, case sensitive. e.g. Apples-1234</li>
+          <li><div class="code-block">?region=</div> - optional region of user (us, eu, kr) - if not specified it will attempt to find it</li>
+        </ul>
+      </div>
+      <p><b>Method Response: <a class="show-response" href="#" onclick="toggleResponse(3)">Show</a></b></p>
+      <div class="method-response code-block full" style="display: none">
+      {
+        ok: <span class="md bool">true</span>,
+        data: {
+          player: {
+            battletag: <span class="md string">'Apples-1234'</span>,
+            avatar: <span class="md string">'https://blzgdapipro-a.akamaihd.net/game/unlocks/0x0250000000000BAD.png'</span>,
+            region: <span class="md string">'us'</span>,
+            level: <span class="md int">15</span>,
+            rank: <span class="md int">1</span>,
+            comprank: <span class="md int">2512</span>
+          },
         }
       }
       </div>
