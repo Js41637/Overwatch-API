@@ -19,18 +19,18 @@ def root():
 @bp.route('/u/<user>')
 @bp.route('/u/<user>/')
 def get_user(user):
-    cached = cache.get(user + 'info')
-    if cached is not None:
-        return return_data(cached)
-
-    data = utils.find_user(user, request.values.get("region", None))
+    platform = request.values.get("platform", "pc")
+    data = utils.find_user(user, request.values.get("region", None), platform, '', 'info')
     if not data:
         abort(404)
 
-    page, region, battletag = data[0]
-    stats = parsers.parse_stats('basic', page, region, battletag, None)
+    if data[1] is not None:
+        return return_data(data[1])
 
-    cache.set(user + 'info', stats, 1200)
+    page, region, battletag = data[0]
+    stats = parsers.parse_stats('basic', page, region, battletag, platform, None)
+
+    cache.set(user + region + platform + 'info', stats, 1200)
     return return_data(stats)
 
 @bp.route('/u/<user>/stats')
@@ -40,21 +40,21 @@ def get_user_stats(user, version='both'):
     if version != 'quickplay' and version != 'competitive' and version != 'both':
         return return_error('Invalid Type')
 
-    cached = cache.get(user + version + 'stats')
-    if cached is not None:
-        return return_data(cached)
-
-    data = utils.find_user(user, request.values.get("region", None))
+    platform = request.values.get("platform", "pc")
+    data = utils.find_user(user, request.values.get("region", None), platform, version, 'stats')
     if not data:
         abort(404)
 
+    if data[1] is not None:
+        return return_data(data[1])
+
     page, region, battletag = data[0]
-    stats = parsers.parse_stats('full', page, region, battletag, version)
+    stats = parsers.parse_stats('full', page, region, battletag, platform, version)
 
     if 'error' in stats and stats['error']:
         return return_error(stats['msg'])
     else:
-        cache.set(user + version + 'stats', stats, 1200)
+        cache.set(user + region + platform + version + 'stats', stats, 1200)
         return return_data(stats)
 
 
@@ -65,13 +65,13 @@ def get_user_heroes(user, version='both'):
     if version != 'quickplay' and version != 'competitive' and version != 'both':
         return return_error('Invalid Type')
 
-    cached = cache.get(user + version + 'heroes')
-    if cached is not None:
-        return return_data(cached)
-
-    data = utils.find_user(user, request.values.get("region", None))
+    platform = request.values.get("platform", "pc")
+    data = utils.find_user(user, request.values.get("region", None), platform, version, 'heroes')
     if not data:
         abort(404)
+
+    if data[1] is not None:
+        return return_data(data[1])
 
     page, region, battletag = data[0]
     stats = parsers.parse_heroes(page, region, battletag, version)
@@ -79,7 +79,7 @@ def get_user_heroes(user, version='both'):
     if 'error' in stats and stats['error']:
         return return_error(stats['msg'])
     else:
-        cache.set(user + version + 'heroes', stats, 1200)
+        cache.set(user + region + platform + version + 'heroes', stats, 1200)
         return return_data(stats)
 
 
@@ -96,13 +96,13 @@ def get_user_hero(user, hero=None, version='both'):
     if version != 'quickplay' and version != 'competitive' and version != 'both':
         return return_error('Invalid Type')
 
-    cached = cache.get(user + hero.lower() + version + 'hero')
-    if cached is not None:
-        return return_data(cached)
-
-    data = utils.find_user(user, request.values.get("region", None))
+    platform = request.values.get("platform", "pc")
+    data = utils.find_user(user, request.values.get("region", None), platform, version, hero.lower() + 'hero')
     if not data:
         abort(404)
+
+    if data[1] is not None:
+        return return_data(data[1])
 
     page, region, battletag = data[0]
     stats = parsers.parse_hero(page, region, battletag, hero.lower(), version)
@@ -110,7 +110,7 @@ def get_user_hero(user, hero=None, version='both'):
     if 'error' in stats and stats['error']:
         return return_error(stats['msg'])
     else:
-        cache.set(user + hero.lower() + version + 'hero', stats, 1200)
+        cache.set(user + region + platform + version + hero.lower() + 'hero', stats, 1200)
         return return_data(stats)
 
 

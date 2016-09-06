@@ -2,7 +2,7 @@ from lxml import etree
 import utils
 import datastore
 
-def parse_stats(mode, page, region, battletag, version):
+def parse_stats(mode, page, region, battletag, platform, version):
     if version == 'both':
         data = {"player": {}, "stats": { "quickplay": {}, "competitive": {}}}
     elif version == 'quickplay':
@@ -15,7 +15,8 @@ def parse_stats(mode, page, region, battletag, version):
     parsed = etree.HTML(page)
 
     data["player"]["battletag"] = battletag
-    data["player"]["region"] = region
+    data["player"]["region"] = region if platform == 'pc' else None
+    data["player"]["platform"] = platform
     data["player"]["level"] = int(parsed.find(".//div[@class='player-level']/div").text)
     data["player"]["avatar"] = parsed.find(".//img[@class='player-portrait']").attrib['src']
 
