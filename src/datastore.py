@@ -18,6 +18,7 @@ heroes = {
     "roadhog":    {"id": "0x02E0000000000040", "name": "Roadhog"},
     "s76":        {"id": "0x02E000000000006E", "name": "Soldier: 76"},
     "soldier76":  {"id": "0x02E000000000006E", "name": "Soldier: 76"},
+    "sombra":     {"id": "0x02E000000000012E", "name": "Sombra"},
     "symmetra":   {"id": "0x02E0000000000016", "name": "Symetra"},
     "torbjorn":   {"id": "0x02E0000000000006", "name": "Torbjörn"},
     "tracer":     {"id": "0x02E0000000000003", "name": "Tracer"},
