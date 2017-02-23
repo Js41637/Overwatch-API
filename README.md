@@ -20,7 +20,7 @@ This is written using Python 2.7 and only has 3 dependencies, Flask, lxml and re
 ```python main.py```
 
 ## Todo
- * I dunno
+ * Make playtime and other 00:05 numbers return as proper numbers instead of strings
 
 ## Hosting
 I host using Google App Engine, it's free and you can directly upload the src just remove the following code from `main.py`

@@ -6,7 +6,6 @@ import datastore
 
 bp = Blueprint("routes", __name__)
 
-
 @bp.errorhandler(404)
 def not_found(error):
     return make_response(return_error('profile not found'), 404)
@@ -20,68 +19,58 @@ def root():
 @bp.route('/u/<user>/')
 def get_user(user):
     platform = request.values.get("platform", "pc")
-    data = utils.find_user(user, request.values.get("region", None), platform, '', 'info')
+    data = utils.get_data(user, request.values.get("region", None), platform)
     if not data:
         abort(404)
 
-    if data[1] is not None:
-        return return_data(data[1])
+    return return_data(data["player"])
 
-    page, region, battletag = data[0]
-    stats = parsers.parse_stats('basic', page, region, battletag, platform, None)
+@bp.route('/u/<user>/blob')
+@bp.route('/u/<user>/blob/')
+def get_user_blob(user):
+    platform = request.values.get("platform", "pc")
+    data = utils.get_data(user, request.values.get("region", None), platform)
+    if not data:
+        abort(404)
 
-    cache.set(user + region + platform + 'info', stats, 1200)
-    return return_data(stats)
+    return return_data(data)
 
 @bp.route('/u/<user>/stats')
 @bp.route('/u/<user>/stats/')
 @bp.route('/u/<user>/stats/<version>')
 def get_user_stats(user, version='both'):
-    if version != 'quickplay' and version != 'competitive' and version != 'both':
-        return return_error('Invalid Type')
-
     platform = request.values.get("platform", "pc")
-    data = utils.find_user(user, request.values.get("region", None), platform, version, 'stats')
+    data = utils.get_data(user, request.values.get("region", None), platform)
     if not data:
         abort(404)
 
-    if data[1] is not None:
-        return return_data(data[1])
+    del data["stats"]["heroes"]
+    if version == 'quickplay':
+         del data["stats"]["competitive"]
+    if version == 'competitive':
+        del data["stats"]["quickplay"]
 
-    page, region, battletag = data[0]
-    stats = parsers.parse_stats('full', page, region, battletag, platform, version)
-
-    if 'error' in stats and stats['error']:
-        return return_error(stats['msg'])
-    else:
-        cache.set(user + region + platform + version + 'stats', stats, 1200)
-        return return_data(stats)
-
+    return return_data(data)
 
 @bp.route('/u/<user>/heroes')
 @bp.route('/u/<user>/heroes/')
 @bp.route('/u/<user>/heroes/<version>')
 def get_user_heroes(user, version='both'):
-    if version != 'quickplay' and version != 'competitive' and version != 'both':
-        return return_error('Invalid Type')
-
     platform = request.values.get("platform", "pc")
-    data = utils.find_user(user, request.values.get("region", None), platform, version, 'heroes')
+    data = utils.get_data(user, request.values.get("region", None), platform)
     if not data:
         abort(404)
 
-    if data[1] is not None:
-        return return_data(data[1])
+    out = {
+        "quickplay": stats["stats"]["quickplay"]["playtimes"],
+        "competitive": stats["stats"]["competitive"]["playtimes"]
+    }
+    if version == 'quickplay':
+         del out["competitive"]
+    if version == 'competitive':
+        del out["quickplay"]
 
-    page, region, battletag = data[0]
-    stats = parsers.parse_heroes(page, region, battletag, version)
-
-    if 'error' in stats and stats['error']:
-        return return_error(stats['msg'])
-    else:
-        cache.set(user + region + platform + version + 'heroes', stats, 1200)
-        return return_data(stats)
-
+    return return_data(out)
 
 @bp.route('/u/<user>/hero')
 @bp.route('/u/<user>/hero/')
@@ -91,27 +80,23 @@ def get_user_heroes(user, version='both'):
 def get_user_hero(user, hero=None, version='both'):
     if hero is None:
         return return_error("No hero specified")
-    if hero.lower() not in datastore.heroes:
+    heroname = hero.lower()
+    if heroname not in datastore.heroes:
         return return_error("Invalid hero")
     if version != 'quickplay' and version != 'competitive' and version != 'both':
         return return_error('Invalid Type')
 
     platform = request.values.get("platform", "pc")
-    data = utils.find_user(user, request.values.get("region", None), platform, version, hero.lower() + 'hero')
+    data = utils.get_data(user, request.values.get("region", None), platform)
     if not data:
         abort(404)
 
-    if data[1] is not None:
-        return return_data(data[1])
+    if version == 'quickplay':
+         del data["stats"]["heroes"][heroname]["stats"]["competitive"]
+    if version == 'competitive':
+        del data["stats"]["heroes"][heroname]["stats"]["quickplay"]
 
-    page, region, battletag = data[0]
-    stats = parsers.parse_hero(page, region, battletag, hero.lower(), version)
-
-    if 'error' in stats and stats['error']:
-        return return_error(stats['msg'])
-    else:
-        cache.set(user + region + platform + version + hero.lower() + 'hero', stats, 1200)
-        return return_data(stats)
+    return return_data(data["stats"]["heroes"][heroname])
 
 
 def return_data(data):

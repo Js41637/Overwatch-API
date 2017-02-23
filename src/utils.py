@@ -1,17 +1,32 @@
 import requests
 import cache
+import parsers
 
 PAGEURL = "https://playoverwatch.com/en-us/career/{platform}{region}/{tag}"
 
+def get_data(user, region, platform):
+    data = find_user(user, region, platform)
 
-def find_user(battletag, region, platform, version, method):
+    if not data:
+        return None
+
+    if data[1]:
+        stats = data[1]
+    else:
+        page, region, battletag = data[0]
+        stats = parsers.parse_stats(page, region, battletag, platform)
+        cache.set(user + region + platform, stats, 1200)
+
+    return stats
+
+def find_user(battletag, region, platform):
     if not region:
         regions = ["us", "eu", "kr"]
     else:
         regions = [region]
 
     for reg in regions:
-        cached = cache.get(battletag + reg + platform + version + method)
+        cached = cache.get(battletag + reg + platform)
         if cached is not None:
             return None, cached
 

@@ -74,13 +74,12 @@
   <h2>API Endpoints</h2>
   <div id="methods">
     <div class="method">
-      <h4>User Stats: <div class="code-block">/api/u/&lt;user&gt;/stats/&lt;type&gt;</div></h4>
+      <h4>User Info: <div class="code-block">/api/u/&lt;user&gt;</div></h4>
       <div class="method-details">
-        <p><b>Returns a users QuickPlay and/or Competitive stats (if any)</b></p>
+        <p><b>Returns basic user info</b></p>
         <p><b>Params:</b></p>
         <ul>
           <li><div class="code-block">&lt;user&gt;</div> - users battletag, case sensitive. e.g. Apples-1234</li>
-          <li><div class="code-block">&lt;type&gt;</div> - optional type, will return only data relating to type, not sending a type will default to <div class="code-block">both</div>, valid types are <div class="code-block">quickplay</div>, <div class="code-block">competitive</div> or <div class="code-block">both</div></li>
           <li><div class="code-block">?region=</div> - optional region of user (us, eu, kr) - if not specified it will attempt to find it</li>
         </ul>
       </div>
@@ -97,8 +96,44 @@
             rank: <span class="md int">1</span>,
             comprank: <span class="md int">2512</span>
           },
+        }
+      }
+      </div>
+    </div>
+    <hr>
+    <div class="method">
+      <h4>User Stats: <div class="code-block">/api/u/&lt;user&gt;/stats/&lt;type&gt;</div></h4>
+      <div class="method-details">
+        <p><b>Returns a users QuickPlay and/or Competitive stats (if any)</b></p>
+        <p><b>Params:</b></p>
+        <ul>
+          <li><div class="code-block">&lt;user&gt;</div> - users battletag, case sensitive. e.g. Apples-1234</li>
+          <li><div class="code-block">&lt;type&gt;</div> - optional type, will return only data relating to type, not sending a type will default to <div class="code-block">both</div>, valid types are <div class="code-block">quickplay</div>, <div class="code-block">competitive</div> or <div class="code-block">both</div></li>
+          <li><div class="code-block">?region=</div> - optional region of user (us, eu, kr) - if not specified it will attempt to find it</li>
+        </ul>
+      </div>
+      <p><b>Method Response: <a class="show-response" href="#" onclick="toggleResponse(1)">Show</a></b></p>
+      <div class="method-response code-block full" style="display: none">
+      {
+        ok: <span class="md bool">true</span>,
+        data: {
+          player: {
+            battletag: <span class="md string">'Apples-1234'</span>,
+            avatar: <span class="md string">'https://blzgdapipro-a.akamaihd.net/game/unlocks/0x0250000000000BAD.png'</span>,
+            region: <span class="md string">'us'</span>,
+            level: <span class="md int">15</span>,
+            rank: <span class="md int">1</span>,
+            comprank: <span class="md int">2512</span>,
+            compteir: <span class="md string">'platinum'</span>,
+            compteirimage: <span class="md string">'https://blzgdapipro-a.akamaihd.net/game/rank-icons/season-2/rank-4.png'</span>
+          },
           stats: {
-            competitive: <span class="md undef">null</span>,
+            competitive: {
+              featured_stats: [],
+              game_stats: {},
+              overall_stats: {},
+              playtimes: []
+            },
             quickplay: {
               featured_stats: [{
                   avg: <span class="md int">1333</span>,
@@ -125,7 +160,18 @@
                 losses: <span class="md int">301</span>,
                 win_rate: <span class="md int">50.8</span>,
                 wins: <span class="md int">311</span>
-              }
+              },
+              playtimes: [{
+                name: <span class="md string">"Mercy"</span>,
+                time: <span class="md string">"40 hours"</span>,
+                extended: <span class="md string">"/hero/mercy"</span>
+              }, {
+                name: <span class="md string">"Pharah"</span>,
+                time: <span class="md string">"30 hours"</span>,
+                extended: <span class="md string">"/hero/pharah"</span>
+              }, {
+                ...
+              }]
             }
           }
         }
@@ -144,7 +190,7 @@
           <li><div class="code-block">?region=</div> - optional region of user (us, eu, kr) - if not specified it will attempt to find it</li>
         </ul>
       </div>
-      <p><b>Method Response: <a class="show-response" href="#" onclick="toggleResponse(1)">Show</a></b></p>
+      <p><b>Method Response: <a class="show-response" href="#" onclick="toggleResponse(2)">Show</a></b></p>
       <div class="method-response code-block full" style="display: none">
       {
         ok: <span class="md bool">true</span>,
@@ -185,64 +231,11 @@
             <div class="code-block">&lt;hero&gt;</div> - name of hero - see below for valid heroes
             <ul>
               <li>
-                <div class="code-block">ana</div>, <div class="code-block">bastion</div>, <div class="code-block">d.va</div>, <div class="code-block">dva</div>, <div class="code-block">genji</div>, <div class="code-block">hanzo</div>, <div class="code-block">junkrat</div>, <div class="code-block">lucio</div>, <div class="code-block">mccree</div>, <div class="code-block">mei</div>, <div class="code-block">mercy</div>, <div class="code-block">pharah</div>, <div class="code-block">reaper</div>, <div class="code-block">reinhardt</div>, <div class="code-block">roadhog</div>, <div class="code-block">s76</div>, <div class="code-block">soldier76</div>, <div class="code-block">symmetra</div>, <div class="code-block">torbjorn</div>, <div class="code-block">tracer</div>, <div class="code-block">widowmaker</div>, <div class="code-block">winston</div>, <div class="code-block">zarya</div>, <div class="code-block">zenyatta</div>
+                <div class="code-block">ana</div>, <div class="code-block">bastion</div>, <div class="code-block">dva</div>, <div class="code-block">genji</div>, <div class="code-block">hanzo</div>, <div class="code-block">junkrat</div>, <div class="code-block">lucio</div>, <div class="code-block">mccree</div>, <div class="code-block">mei</div>, <div class="code-block">mercy</div>, <div class="code-block">pharah</div>, <div class="code-block">reaper</div>, <div class="code-block">reinhardt</div>, <div class="code-block">roadhog</div>, <div class="code-block">soldier76</div>, <div class="code-block">sombra</div>, <div class="code-block">symmetra</div>, <div class="code-block">torbjorn</div>, <div class="code-block">tracer</div>, <div class="code-block">widowmaker</div>, <div class="code-block">winston</div>, <div class="code-block">zarya</div>, <div class="code-block">zenyatta</div>
               </li>
             </ul>
           </li>
           <li><div class="code-block">&lt;type&gt;</div> - optional type, will return only data relating to type, not sending a type will default to <div class="code-block">both</div>, valid types are <div class="code-block">quickplay</div>, <div class="code-block">competitive</div> or <div class="code-block">both</div></li>
-          <li><div class="code-block">?region=</div> - optional region of user (us, eu, kr) - if not specified it will attempt to find it</li>
-        </ul>
-      </div>
-      <p><b>Method Response: <a class="show-response" href="#" onclick="toggleResponse(2)">Show</a></b></p>
-      <div class="method-response code-block full" style="display: none">
-      {
-        ok: <span class="md bool">true</span>,
-        data: {
-          name: <span class="md string">"Ana"</span>
-          competitive: null,
-          quickplay: {
-            overall_stats: {
-              games: <span class="md int">6</span>,
-              losses: <span class="md int">4</span>,
-              win_rate: <span class="md int"> 33.3</span>,
-              wins: <span class="md int">2</span>
-            },
-            hero_stats: {
-              melee_final_blow_most_in_game: <span class="md int">1</span>,
-              scoped_accuracy: <span class="md string">"60%"</span>
-            },
-            general_stats: {
-              damage_done: <span class="md int">11158</span>,
-              damage_done_most_in_game: <span class="md int">2888</span>,
-              deaths: <span class="md int">36</span>,
-              eliminations: <span class="md int">25</span>,
-              enemies_slept: <span class="md int">12</span>,
-              ...
-            },
-            featured_stats: [{
-              avg: <span class="md int">1630.77</span>,
-              name: <span class="md string">"healing done"</span>,
-              value: <span class="md int">10048</span>
-            }, {
-              avg: <span class="md int">4.05</span>,
-              name: <span class="md string">"eliminations"</span>,
-              value: <span class="md int">25</span>
-            }, {
-              ...
-            }]
-          }
-        }
-      }
-      </div>
-    </div>
-    <hr>
-    <div class="method">
-      <h4>User Info: <div class="code-block">/api/u/&lt;user&gt;</div></h4>
-      <div class="method-details">
-        <p><b>Returns basic user info</b></p>
-        <p><b>Params:</b></p>
-        <ul>
-          <li><div class="code-block">&lt;user&gt;</div> - users battletag, case sensitive. e.g. Apples-1234</li>
           <li><div class="code-block">?region=</div> - optional region of user (us, eu, kr) - if not specified it will attempt to find it</li>
         </ul>
       </div>
@@ -251,16 +244,173 @@
       {
         ok: <span class="md bool">true</span>,
         data: {
-          player: {
-            battletag: <span class="md string">'Apples-1234'</span>,
-            avatar: <span class="md string">'https://blzgdapipro-a.akamaihd.net/game/unlocks/0x0250000000000BAD.png'</span>,
-            region: <span class="md string">'us'</span>,
-            level: <span class="md int">15</span>,
-            rank: <span class="md int">1</span>,
-            comprank: <span class="md int">2512</span>
-          },
+          name: <span class="md string">"Ana"</span>,
+          class: <span class="md string">"Support"</span>,
+          stats: {
+            competitive: {
+              overall_stats: {},
+              hero_stats: {},
+              general_stats: {},
+              featured_stats: []
+            },
+            quickplay: {
+              overall_stats: {
+                games: <span class="md int">6</span>,
+                losses: <span class="md int">4</span>,
+                win_rate: <span class="md int"> 33.3</span>,
+                wins: <span class="md int">2</span>
+              },
+              hero_stats: {
+                melee_final_blow_most_in_game: <span class="md int">1</span>,
+                scoped_accuracy: <span class="md string">"60%"</span>
+              },
+              general_stats: {
+                damage_done: <span class="md int">11158</span>,
+                damage_done_most_in_game: <span class="md int">2888</span>,
+                deaths: <span class="md int">36</span>,
+                eliminations: <span class="md int">25</span>,
+                enemies_slept: <span class="md int">12</span>,
+                ...
+              },
+              featured_stats: [{
+                avg: <span class="md int">1630.77</span>,
+                name: <span class="md string">"healing done"</span>,
+                value: <span class="md int">10048</span>
+              }, {
+                avg: <span class="md int">4.05</span>,
+                name: <span class="md string">"eliminations"</span>,
+                value: <span class="md int">25</span>
+              }, {
+                ...
+              }]
+            }
+          }
         }
       }
+      </div>
+    </div>
+    <hr>
+    <div class="method">
+      <h4>Blob: <div class="code-block">/api/u/&lt;user&gt;/blob</div></h4>
+      <div class="method-details">
+        <p><b>Returns all data, heroes, stats, playtimes</b></p>
+        <p><b>Params:</b></p>
+        <ul>
+          <li><div class="code-block">&lt;user&gt;</div> - users battletag, case sensitive. e.g. Apples-1234</li>
+          <li><div class="code-block">?region=</div> - optional region of user (us, eu, kr) - if not specified it will attempt to find it</li>
+        </ul>
+      </div>
+      <p><b>Method Response: <a class="show-response" href="#" onclick="toggleResponse(4)">Show</a></b></p>
+      <div class="method-response code-block full" style="display: none">
+        {
+          ok: <span class="md bool">true</span>,
+          data: {
+            player: {
+              battletag: <span class="md string">'Apples-1234'</span>,
+              avatar: <span class="md string">'https://blzgdapipro-a.akamaihd.net/game/unlocks/0x0250000000000BAD.png'</span>,
+              region: <span class="md string">'us'</span>,
+              level: <span class="md int">15</span>,
+              rank: <span class="md int">1</span>,
+              comprank: <span class="md int">2512</span>,
+              compteir: <span class="md string">'platinum'</span>,
+              compteirimage: <span class="md string">'https://blzgdapipro-a.akamaihd.net/game/rank-icons/season-2/rank-4.png'</span>
+            },
+            stats: {
+              competitive: {
+                featured_stats: [],
+                game_stats: {},
+                overall_stats: {},
+                playtimes: []
+              },
+              quickplay: {
+                featured_stats: [{
+                    avg: <span class="md int">1333</span>,
+                    name: <span class="md string">"healing done"</span>,
+                    value: <span class="md int">815570</span>
+                  }, {
+                    avg: <span class="md string">"02:07"</span>,
+                    name: <span class="md string">"time spent on fire"</span>,
+                    value: <span class="md string">"21:38:20"</span>
+                  }, {
+                    ...
+                  }
+                ],
+                game_stats: {
+                  cards: <span class="md int">285</span>,
+                  damage_done: <span class="md int">4061587</span>,
+                  damage_done_most_in_game: <span class="md int">21420</span>,
+                  deaths: <span class="md int">4137</span>,
+                  defensive_assists: <span class="md int">163</span>,
+                  ...
+                },
+                overall_stats: {
+                  games: <span class="md int">612</span>,
+                  losses: <span class="md int">301</span>,
+                  win_rate: <span class="md int">50.8</span>,
+                  wins: <span class="md int">311</span>
+                },
+                playtimes: [{
+                  name: <span class="md string">"Mercy"</span>,
+                  time: <span class="md string">"40 hours"</span>,
+                  extended: <span class="md string">"/hero/mercy"</span>
+                }, {
+                  name: <span class="md string">"Pharah"</span>,
+                  time: <span class="md string">"30 hours"</span>,
+                  extended: <span class="md string">"/hero/pharah"</span>
+                }, {
+                  ...
+                }]
+              }
+              heroes: {
+                ana: {
+                  name: <span class="md string">"Ana"</span>,
+                  class: <span class="md string">"Support"</span>,
+                  stats: {
+                    competitive: {
+                      overall_stats: {},
+                      hero_stats: {},
+                      general_stats: {},
+                      featured_stats: []
+                    },
+                    quickplay: {
+                      overall_stats: {
+                        games: <span class="md int">6</span>,
+                        losses: <span class="md int">4</span>,
+                        win_rate: <span class="md int"> 33.3</span>,
+                        wins: <span class="md int">2</span>
+                      },
+                      hero_stats: {
+                        melee_final_blow_most_in_game: <span class="md int">1</span>,
+                        scoped_accuracy: <span class="md string">"60%"</span>
+                      },
+                      general_stats: {
+                        damage_done: <span class="md int">11158</span>,
+                        damage_done_most_in_game: <span class="md int">2888</span>,
+                        deaths: <span class="md int">36</span>,
+                        eliminations: <span class="md int">25</span>,
+                        enemies_slept: <span class="md int">12</span>,
+                        ...
+                      },
+                      featured_stats: [{
+                        avg: <span class="md int">1630.77</span>,
+                        name: <span class="md string">"healing done"</span>,
+                        value: <span class="md int">10048</span>
+                      }, {
+                        avg: <span class="md int">4.05</span>,
+                        name: <span class="md string">"eliminations"</span>,
+                        value: <span class="md int">25</span>
+                      }, {
+                        ...
+                      }]
+                    }
+                  }
+                }, {
+                  ...
+                }
+              }
+            }
+          }
+        }
       </div>
     </div>
   </div>

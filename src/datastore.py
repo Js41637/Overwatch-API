@@ -1,31 +1,40 @@
 # -*- coding: utf-8 -*-
 # IDs correlate to Group IDs for each heroes stats on the page
 heroes = {
-    "ana":        {"id": "0x02E000000000013B", "name": "Ana"},
-    "bastion":    {"id": "0x02E0000000000015", "name": "Bastion"},
-    "d.va":       {"id": "0x02E000000000007A", "name": "D.Va"},
-    "dva":        {"id": "0x02E000000000007A", "name": "D.Va"},
-    "genji":      {"id": "0x02E0000000000029", "name": "Genji"},
-    "hanzo":      {"id": "0x02E0000000000005", "name": "Hanzo"},
-    "junkrat":    {"id": "0x02E0000000000065", "name": "Junkrat"},
-    "lucio":      {"id": "0x02E0000000000079", "name": "Lúcio"},
-    "mccree":     {"id": "0x02E0000000000042", "name": "McCree"},
-    "mei":        {"id": "0x02E00000000000DD", "name": "Mei"},
-    "mercy":      {"id": "0x02E0000000000004", "name": "Mercy"},
-    "pharah":     {"id": "0x02E0000000000008", "name": "Pharah"},
-    "reaper":     {"id": "0x02E0000000000002", "name": "Reaper"},
-    "reinhardt":  {"id": "0x02E0000000000007", "name": "Reinhardt"},
-    "roadhog":    {"id": "0x02E0000000000040", "name": "Roadhog"},
-    "s76":        {"id": "0x02E000000000006E", "name": "Soldier: 76"},
-    "soldier76":  {"id": "0x02E000000000006E", "name": "Soldier: 76"},
-    "sombra":     {"id": "0x02E000000000012E", "name": "Sombra"},
-    "symmetra":   {"id": "0x02E0000000000016", "name": "Symetra"},
-    "torbjorn":   {"id": "0x02E0000000000006", "name": "Torbjörn"},
-    "tracer":     {"id": "0x02E0000000000003", "name": "Tracer"},
-    "widowmaker": {"id": "0x02E000000000000A", "name": "Widowmaker"},
-    "winston":    {"id": "0x02E0000000000009", "name": "Winston"},
-    "zarya":      {"id": "0x02E0000000000068", "name": "Zarya"},
-    "zenyatta":   {"id": "0x02E0000000000020", "name": "Zenyatta"}
+    "ana":        {"id": "0x02E000000000013B", "name": "Ana", "class": "Support"},
+    "bastion":    {"id": "0x02E0000000000015", "name": "Bastion", "class": "Defence"},
+    "dva":        {"id": "0x02E000000000007A", "name": "D.Va", "class": "Tank"},
+    "genji":      {"id": "0x02E0000000000029", "name": "Genji", "class": "Assault"},
+    "hanzo":      {"id": "0x02E0000000000005", "name": "Hanzo", "class": "Defence"},
+    "junkrat":    {"id": "0x02E0000000000065", "name": "Junkrat", "class": "Defence"},
+    "lucio":      {"id": "0x02E0000000000079", "name": "Lúcio", "class": "Support"},
+    "mccree":     {"id": "0x02E0000000000042", "name": "McCree", "class": "Assault"},
+    "mei":        {"id": "0x02E00000000000DD", "name": "Mei", "class": "Defence"},
+    "mercy":      {"id": "0x02E0000000000004", "name": "Mercy", "class": "Support"},
+    "pharah":     {"id": "0x02E0000000000008", "name": "Pharah", "class": "Assault"},
+    "reaper":     {"id": "0x02E0000000000002", "name": "Reaper", "class": "Assault"},
+    "reinhardt":  {"id": "0x02E0000000000007", "name": "Reinhardt", "class": "Tank"},
+    "roadhog":    {"id": "0x02E0000000000040", "name": "Roadhog", "class": "Tank"},
+    "soldier76":  {"id": "0x02E000000000006E", "name": "Soldier: 76", "class": "Assault"},
+    "sombra":     {"id": "0x02E000000000012E", "name": "Sombra", "class": "Assault"},
+    "symmetra":   {"id": "0x02E0000000000016", "name": "Symmetra", "class": "Support"},
+    "torbjorn":   {"id": "0x02E0000000000006", "name": "Torbjörn", "class": "Defence"},
+    "tracer":     {"id": "0x02E0000000000003", "name": "Tracer", "class": "Assault"},
+    "widowmaker": {"id": "0x02E000000000000A", "name": "Widowmaker", "class": "Defence"},
+    "winston":    {"id": "0x02E0000000000009", "name": "Winston", "class": "Tank"},
+    "zarya":      {"id": "0x02E0000000000068", "name": "Zarya", "class": "Tank"},
+    "zenyatta":   {"id": "0x02E0000000000020", "name": "Zenyatta", "class": "Support"}
+}
+
+# IDs correlate to Image names used for the Rank Images
+comp_ranks = {
+    "rank-1.png": "bronze",
+    "rank-2.png": "silver",
+    "rank-3.png": "gold",
+    "rank-4.png": "platinum",
+    "rank-5.png": "diamond",
+    "rank-6.png": "master",
+    "rank-7.png": "grandmaster"
 }
 
 # IDs correlate to Image IDs used for the Border Images
