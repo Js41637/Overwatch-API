@@ -28,13 +28,13 @@ heroes = {
 
 # IDs correlate to Image names used for the Rank Images
 comp_ranks = {
-    "rank-1.png": "bronze",
-    "rank-2.png": "silver",
-    "rank-3.png": "gold",
-    "rank-4.png": "platinum",
-    "rank-5.png": "diamond",
-    "rank-6.png": "master",
-    "rank-7.png": "grandmaster"
+    "rank-1.png": "Bronze",
+    "rank-2.png": "Silver",
+    "rank-3.png": "Gold",
+    "rank-4.png": "Platinum",
+    "rank-5.png": "Diamond",
+    "rank-6.png": "Master",
+    "rank-7.png": "Grandmaster"
 }
 
 # IDs correlate to Image IDs used for the Border Images
