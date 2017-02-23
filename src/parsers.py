@@ -71,6 +71,10 @@ def parse_game_stats(parsed):
     # Start with them filled in so if there is no stats for some reason, it keeps the empty objects and stuff
     data = {"quickplay": {"overall_stats": {}, "game_stats": {}, "featured_stats": []}, "competitive": {"overall_stats": {}, "game_stats": {}, "featured_stats": []}}
     stats = parsed.xpath(".//div[@data-group-id='stats' and @data-category-id='0x02E00000FFFFFFFF']")
+
+    if len(stats) == 1:
+        data["competitive"]["is_empty"] = True
+
     for i, item in enumerate(stats):
         stat_groups = item
 
@@ -172,7 +176,12 @@ def parse_hero(parsed):
         }
 
         if len(stats) == 0:
+            heroes[key]["stats"]["quickplay"]["is_empty"] = True
+            heroes[key]["stats"]["competitive"]["is_empty"] = True
             continue
+
+        if len(stats) == 1:
+            heroes[key]["stats"]["competitive"]["is_empty"] = True
 
         # Go through both QuickPlay and Competetive stats
         for statsIndex, item in enumerate(stats):
