@@ -23,7 +23,7 @@ def get_user(user):
     if not data:
         abort(404)
 
-    return return_data(data["player"])
+    return return_data({"player": data["player"]})
 
 @bp.route('/u/<user>/blob')
 @bp.route('/u/<user>/blob/')
@@ -62,8 +62,8 @@ def get_user_heroes(user, version='both'):
         abort(404)
 
     out = {
-        "quickplay": stats["stats"]["quickplay"]["playtimes"],
-        "competitive": stats["stats"]["competitive"]["playtimes"]
+        "quickplay": data["stats"]["quickplay"]["playtimes"],
+        "competitive": data["stats"]["competitive"]["playtimes"]
     }
     if version == 'quickplay':
          del out["competitive"]
