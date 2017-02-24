@@ -110,7 +110,7 @@ def parse_game_stats(parsed):
             stats = subbox.findall(".//tbody/tr")
             for stat in stats:
                 name, value = stat[0].text.lower().replace(" ", "_").replace("_-_", "_"), stat[1].text
-                amount = utils.parseInt(value)
+                amount = utils.try_extract(value)
                 if 'average' in name.lower():
                     # Don't include average stats in the game_stats, use them for the featured stats section
                     average_stats[name.replace("_average", "")] = amount
@@ -154,8 +154,9 @@ def parse_heroes(parsed):
                     htime = '0'
             hname = hero.find(".//div[@class='title']").text
             cname = hname.replace(".", "").replace(": ", "").replace(u"\xfa", "u").replace(u'\xf6', 'o')
+            time = utils.try_extract(htime)
 
-            built_heroes.append({"name": hname, "time": htime, "extended": '/hero/' + cname.lower()})
+            built_heroes.append({"name": hname, "time": time, "extended": '/hero/' + cname.lower()})
 
         if i == 0:
             playtimes["quickplay"] = built_heroes
@@ -203,30 +204,38 @@ def parse_hero(parsed):
             for itemIndex, subbox in enumerate(item[startingPos:]):
                 title = subbox.find(".//span[@class='stat-title']").text
                 if title == 'Game':
-                    game_box = item[itemIndex + 1]
+                    # tbh I don't really know how this works
+                    try:
+                        game_box = item[itemIndex + 1]
+                    except:
+                        game_box = item[itemIndex]
                     break
             else:
                 game_box = None
 
             # Fetch Overall stats
+            wins, games, winrate, losses = None, None, None, None
             if game_box is not None:
                 wins = game_box.xpath(".//text()[. = 'Games Won']/../..")
                 games = game_box.xpath(".//text()[. = 'Games Played']/../..")
-                overall_stats["wins"] = int(wins[0][1].text.replace(",", "")) if len(wins) != 0 else None
-                overall_stats["games"] = int(games[0][1].text.replace(",", "")) if len(games) != 0 else None
-                if overall_stats["wins"] is not None and overall_stats["games"] is not None and overall_stats["wins"] is not 0 and overall_stats["games"] is not 0:
-                    overall_stats["win_rate"] = round(((float(overall_stats["wins"]) / overall_stats["games"])), 1)
-                    overall_stats["losses"] = overall_stats["games"] - overall_stats["wins"]
+                wins = int(wins[0][1].text.replace(",", "")) if len(wins) != 0 else 0
+                games = int(games[0][1].text.replace(",", "")) if len(games) != 0 else None
+
+                # If there is no games we can assume they haven't finished any games as this hero
+                if games is not None:
+                    losses = games - wins
+                    winrate = round((float(wins) / games), 1) if wins is not 0 else 0
                 else:
-                    overall_stats.update({"win_rate": None, "losses": None})
-            else:
-                overall_stats = {'wins': None, 'win_rate': None, 'losses': None, 'games': None}
+                    # Quickplay only returns wins so if wins is not 0, return wins
+                    wins = None if wins == 0 else wins
+
+            overall_stats = {'wins': wins, 'win_rate': winrate, 'losses': losses, 'games': games}
 
             # Fetch Hero Specific Stats
             if hero_box is not None:
                 for hstat in hero_box.findall(".//tbody/tr"):
                     name, value = hstat[0].text.lower().replace(" ", "_").replace("_-_", "_"), hstat[1].text
-                    amount = utils.parseInt(value)
+                    amount = utils.try_extract(value)
                     if 'average' in name.lower():
                         # Don't include average stats in the general_stats, use them for the featured stats section
                         average_stats[name.replace("_average", "")] = amount
@@ -238,7 +247,7 @@ def parse_hero(parsed):
                 stats = subbox.findall(".//tbody/tr")
                 for stat in stats:
                     name, value = stat[0].text.lower().replace(" ", "_").replace("_-_", "_"), stat[1].text
-                    amount = utils.parseInt(value)
+                    amount = utils.try_extract(value)
                     if 'average' in name.lower():
                         # Don't include average stats in the general_stats, use them for the featured stats section
                         average_stats[name.replace("_average", "")] = amount

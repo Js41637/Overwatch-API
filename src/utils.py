@@ -1,4 +1,5 @@
 import requests
+import re
 import cache
 import parsers
 
@@ -66,8 +67,70 @@ def parseInt(input):
     """
     Attempts to parse an int or return original
     """
-    a = input.replace(",", "")
     try:
+        a = input.replace(",", "")
         return float(a)
-    except ValueError:
-        return a
+    except:
+        return input
+
+HOUR_REGEX = re.compile(r"([0-9]*) hours?")
+MINUTE_REGEX = re.compile(r"([0-9]*) minutes?")
+SECOND_REGEX = re.compile(r"([0-9]*\.?[0-9]*) seconds?")
+PERCENT_REGEX = re.compile(r"([0-9]{1,3})\s?\%")
+
+def try_extract(value):
+    """
+    Attempt to extract a meaningful value from the time.
+    """
+    get_float = parseInt(value)
+    # If it's changed, return the new int value.
+    if get_float != value:
+        return get_float
+
+    # Next, try and get a time out of it.
+    matched = HOUR_REGEX.match(value)
+    if matched:
+        val = matched.groups()[0]
+        val = float(val)
+        return val
+
+    matched = MINUTE_REGEX.match(value)
+    if matched:
+        val = matched.groups()[0]
+        val = float(val)
+        val /= 60
+        return val
+
+    matched = SECOND_REGEX.match(value)
+    if matched:
+        val = matched.groups()[0]
+        val = float(val)
+        val = (val / 60 / 60)
+
+        return val
+
+    matched = PERCENT_REGEX.match(value)
+    if matched:
+        val = matched.groups()[0]
+        val = float(val)
+        val = (val / 100)
+
+        return val
+
+    # Check if there's an ':' in it.
+    if ':' in value:
+        sp = value.split(':')
+        # If it's only two, it's mm:ss.
+        if len(sp) == 2:
+            mins, seconds = map(int, sp)
+            hours = float(mins) / 60
+            return hours
+
+        # If it's three, it's hh:mm:ss.
+        if len(sp) == 3:
+            hours, mins, seconds = map(int, sp)
+            mins = float(mins) / 60
+            return hours + mins
+    else:
+        # Just return the value.
+        return value
