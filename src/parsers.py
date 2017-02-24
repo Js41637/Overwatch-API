@@ -28,7 +28,7 @@ def parse_user_data(parsed, region, battletag, platform):
 
     # Try and fetch Comp Rank, Comp Teir and Comp Teir Image
     comp_tree = mast_head.find(".//div[@class='competitive-rank']")
-    if comp_tree:
+    if comp_tree is not None:
         comprank = comp_tree.find(".//div")
         compimg = comp_tree.find(".//img")
         if compimg is not None:
@@ -110,7 +110,7 @@ def parse_game_stats(parsed):
             stats = subbox.findall(".//tbody/tr")
             for stat in stats:
                 name, value = stat[0].text.lower().replace(" ", "_").replace("_-_", "_"), stat[1].text
-                amount = utils.try_extract(value)
+                amount = utils.parseInt(value)
                 if 'average' in name.lower():
                     # Don't include average stats in the game_stats, use them for the featured stats section
                     average_stats[name.replace("_average", "")] = amount
@@ -154,7 +154,7 @@ def parse_heroes(parsed):
                     htime = '0'
             hname = hero.find(".//div[@class='title']").text
             cname = hname.replace(".", "").replace(": ", "").replace(u"\xfa", "u").replace(u'\xf6', 'o')
-            time = utils.try_extract(htime)
+            time = utils.parseInt(htime)
 
             built_heroes.append({"name": hname, "time": time, "extended": '/hero/' + cname.lower()})
 
@@ -235,7 +235,7 @@ def parse_hero(parsed):
             if hero_box is not None:
                 for hstat in hero_box.findall(".//tbody/tr"):
                     name, value = hstat[0].text.lower().replace(" ", "_").replace("_-_", "_"), hstat[1].text
-                    amount = utils.try_extract(value)
+                    amount = utils.parseInt(value)
                     if 'average' in name.lower():
                         # Don't include average stats in the general_stats, use them for the featured stats section
                         average_stats[name.replace("_average", "")] = amount
@@ -247,7 +247,7 @@ def parse_hero(parsed):
                 stats = subbox.findall(".//tbody/tr")
                 for stat in stats:
                     name, value = stat[0].text.lower().replace(" ", "_").replace("_-_", "_"), stat[1].text
-                    amount = utils.try_extract(value)
+                    amount = utils.parseInt(value)
                     if 'average' in name.lower():
                         # Don't include average stats in the general_stats, use them for the featured stats section
                         average_stats[name.replace("_average", "")] = amount
