@@ -5,7 +5,7 @@ import parsers
 
 PAGEURL = "https://playoverwatch.com/en-us/career/{platform}{region}/{tag}"
 
-def get_data(user, region, platform):
+def get_data_from_page_or_cache(user, region, platform):
     data = find_user(user, region, platform)
 
     if not data:
@@ -48,7 +48,7 @@ def get_user_page(battletag, region, platform):
 
     url = PAGEURL.format(platform=platform, region=reg, tag=battletag)
 
-    page = get_page(url)
+    page = download_page(url)
 
     if not page:
         return None
@@ -56,19 +56,21 @@ def get_user_page(battletag, region, platform):
     return (page, region, battletag)
 
 
-def get_page(url):
+def download_page(url):
     r = requests.get(url)
     if r.status_code != 200:
         return None
     return r.text
 
 
-def parseInt(input):
+def parse_int(input, intpls):
     """
     Attempts to parse an int or return original
     """
     try:
         a = input.replace(",", "")
+        if intpls:
+            return int(a)
         return float(a)
     except:
         return input

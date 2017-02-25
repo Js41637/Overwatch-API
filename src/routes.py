@@ -19,7 +19,7 @@ def root():
 @bp.route('/u/<user>/')
 def get_user(user):
     platform = request.values.get("platform", "pc")
-    data = utils.get_data(user, request.values.get("region", None), platform)
+    data = utils.get_data_from_page_or_cache(user, request.values.get("region", None), platform)
     if not data:
         abort(404)
 
@@ -29,7 +29,7 @@ def get_user(user):
 @bp.route('/u/<user>/blob/')
 def get_user_blob(user):
     platform = request.values.get("platform", "pc")
-    data = utils.get_data(user, request.values.get("region", None), platform)
+    data = utils.get_data_from_page_or_cache(user, request.values.get("region", None), platform)
     if not data:
         abort(404)
 
@@ -40,7 +40,7 @@ def get_user_blob(user):
 @bp.route('/u/<user>/stats/<version>')
 def get_user_stats(user, version='both'):
     platform = request.values.get("platform", "pc")
-    data = utils.get_data(user, request.values.get("region", None), platform)
+    data = utils.get_data_from_page_or_cache(user, request.values.get("region", None), platform)
     if not data:
         abort(404)
 
@@ -57,7 +57,7 @@ def get_user_stats(user, version='both'):
 @bp.route('/u/<user>/heroes/<version>')
 def get_user_heroes(user, version='both'):
     platform = request.values.get("platform", "pc")
-    data = utils.get_data(user, request.values.get("region", None), platform)
+    data = utils.get_data_from_page_or_cache(user, request.values.get("region", None), platform)
     if not data:
         abort(404)
 
@@ -87,7 +87,7 @@ def get_user_hero(user, hero=None, version='both'):
         return return_error('Invalid Type')
 
     platform = request.values.get("platform", "pc")
-    data = utils.get_data(user, request.values.get("region", None), platform)
+    data = utils.get_data_from_page_or_cache(user, request.values.get("region", None), platform)
     if not data:
         abort(404)
 

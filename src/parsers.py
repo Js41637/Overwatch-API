@@ -42,13 +42,10 @@ def parse_user_data(parsed, region, battletag, platform):
             else:
                 player["compteir"] = None
         else:
-            player["compteirimage"] = None
-            player["compteir"] = None
+            player.update({ 'compteir': None, 'compteirimg': None })
         player["comprank"] = int(comprank.text) if comprank is not None else None
     else:
-        player["comprank"] = None
-        player["compteir"] = None
-        player["compteirimg"] = None
+        player.update({ 'comprank': None, 'compteir': None, 'compteirimg': None })
 
     # Try and fetch Rank
     rank = mast_head.xpath(".//div[@class='player-level']")[0]
@@ -76,41 +73,16 @@ def parse_game_stats(parsed):
         data["competitive"]["is_empty"] = True
 
     for i, item in enumerate(stats):
-        stat_groups = item
-
-        overall_stats = {}
-        game_stats = {}
-        featured_stats = []
-
-        game_box = stat_groups[6]
-
-        # Fetch Overall stats
-        w = game_box.xpath(".//text()[. = 'Games Won']/../..")
-        if not w:
-            wins = 0
-        else:
-            wins = int(w[0][1].text.replace(",", ""))
-
-        g = game_box.xpath(".//text()[. = 'Games Played']/../..")
-        if not g:
-            wr, losses, games = 0, 0, 0
-        else:
-            games = int(g[0][1].text.replace(",", ""))
-            wr = round(((float(wins) / games)), 1)
-            losses = games - wins
-
-        overall_stats["wins"] = wins
-        overall_stats["win_rate"] = wr
-        overall_stats["losses"] = losses
-        overall_stats["games"] = games
+        overall_stats, game_stats, average_stats, featured_stats = {}, {}, {}, []
+        game_box, misc_box = find_game_and_misc_boxes(item)
+        overall_stats = parse_overall_stats(game_box, misc_box)
 
         # Fetch Game Stats
-        average_stats = {}
-        for subbox in stat_groups:
+        for subbox in item:
             stats = subbox.findall(".//tbody/tr")
             for stat in stats:
                 name, value = stat[0].text.lower().replace(" ", "_").replace("_-_", "_"), stat[1].text
-                amount = utils.parseInt(value)
+                amount = utils.parse_int(value, False)
                 if 'average' in name.lower():
                     # Don't include average stats in the game_stats, use them for the featured stats section
                     average_stats[name.replace("_average", "")] = amount
@@ -128,7 +100,6 @@ def parse_game_stats(parsed):
                 else:
                     featured_stats.append({ "name": astat.replace("_", " "), "avg": average_stats[astat], "value": game_stats[astat]})
 
-
         if i == 0:
             data["quickplay"] = {"featured_stats": featured_stats, "game_stats": game_stats, "overall_stats": overall_stats}
         else:
@@ -138,7 +109,7 @@ def parse_game_stats(parsed):
 
 # Get playtime each hero for Quickplay and Competitive
 def parse_heroes(parsed):
-    playtimes = {"quickplay": [], "competitive": []}
+    playtimes = { 'quickplay': [], 'competitive': [] }
     playtimestats = parsed.xpath(".//div[@data-category-id='overwatch.guid.0x0860000000000021']")
     for i, item in enumerate(playtimestats):
         built_heroes = []
@@ -154,14 +125,14 @@ def parse_heroes(parsed):
                     htime = '0'
             hname = hero.find(".//div[@class='title']").text
             cname = hname.replace(".", "").replace(": ", "").replace(u"\xfa", "u").replace(u'\xf6', 'o')
-            time = utils.parseInt(htime)
+            time = utils.parse_int(htime, False)
 
-            built_heroes.append({"name": hname, "time": time, "extended": '/hero/' + cname.lower()})
+            built_heroes.append({ 'name': hname, 'time': time, 'extended': '/hero/' + cname.lower() })
 
         if i == 0:
-            playtimes["quickplay"] = built_heroes
+            playtimes['quickplay'] = built_heroes
         else:
-            playtimes["competitive"] = built_heroes
+            playtimes['competitive'] = built_heroes
 
     return playtimes
 
@@ -186,11 +157,7 @@ def parse_hero(parsed):
 
         # Go through both QuickPlay and Competetive stats
         for statsIndex, item in enumerate(stats):
-            hero_stats = {}
-            general_stats = {}
-            featured_stats = []
-            overall_stats = {}
-            average_stats = {}
+            hero_stats, general_stats, overall_stats, average_stats, featured_stats = {}, {}, {}, {}, []
 
             hbtitle = item[0].find(".//span[@class='stat-title']").text
             if hbtitle == 'Hero Specific':
@@ -200,42 +167,14 @@ def parse_hero(parsed):
                 hero_box = None
                 startingPos = 0
 
-            # Find the Game Box as it can change location
-            for itemIndex, subbox in enumerate(item[startingPos:]):
-                title = subbox.find(".//span[@class='stat-title']").text
-                if title == 'Game':
-                    # tbh I don't really know how this works
-                    try:
-                        game_box = item[itemIndex + 1]
-                    except:
-                        game_box = item[itemIndex]
-                    break
-            else:
-                game_box = None
-
-            # Fetch Overall stats
-            wins, games, winrate, losses = None, None, None, None
-            if game_box is not None:
-                wins = game_box.xpath(".//text()[. = 'Games Won']/../..")
-                games = game_box.xpath(".//text()[. = 'Games Played']/../..")
-                wins = int(wins[0][1].text.replace(",", "")) if len(wins) != 0 else 0
-                games = int(games[0][1].text.replace(",", "")) if len(games) != 0 else None
-
-                # If there is no games we can assume they haven't finished any games as this hero
-                if games is not None:
-                    losses = games - wins
-                    winrate = round((float(wins) / games), 1) if wins is not 0 else 0
-                else:
-                    # Quickplay only returns wins so if wins is not 0, return wins
-                    wins = None if wins == 0 else wins
-
-            overall_stats = {'wins': wins, 'win_rate': winrate, 'losses': losses, 'games': games}
+            game_box, misc_box = find_game_and_misc_boxes(item)
+            overall_stats = parse_overall_stats(game_box, misc_box)
 
             # Fetch Hero Specific Stats
             if hero_box is not None:
                 for hstat in hero_box.findall(".//tbody/tr"):
                     name, value = hstat[0].text.lower().replace(" ", "_").replace("_-_", "_"), hstat[1].text
-                    amount = utils.parseInt(value)
+                    amount = utils.parse_int(value, False)
                     if 'average' in name.lower():
                         # Don't include average stats in the general_stats, use them for the featured stats section
                         average_stats[name.replace("_average", "")] = amount
@@ -247,7 +186,7 @@ def parse_hero(parsed):
                 stats = subbox.findall(".//tbody/tr")
                 for stat in stats:
                     name, value = stat[0].text.lower().replace(" ", "_").replace("_-_", "_"), stat[1].text
-                    amount = utils.parseInt(value)
+                    amount = utils.parse_int(value, False)
                     if 'average' in name.lower():
                         # Don't include average stats in the general_stats, use them for the featured stats section
                         average_stats[name.replace("_average", "")] = amount
@@ -275,3 +214,53 @@ def parse_hero(parsed):
                 heroes[key]["stats"]["competitive"] = {"featured_stats": featured_stats, "general_stats": general_stats, "overall_stats": overall_stats, "hero_stats": hero_stats}
 
     return heroes
+
+def find_game_and_misc_boxes(boxes):
+    try:
+        game_box = boxes[6]
+    except IndexError:
+        for boxindex, box in enumerate(boxes):
+            boxname = box.find(".//span[@class='stat-title']").text
+            if boxname == 'Game':
+                game_box = boxes[boxindex]
+                break
+        else:
+            game_box = None
+    try:
+        misc_box = boxes[7]
+    except IndexError:
+        for boxindex, box in enumerate(boxes):
+            boxname = box.find(".//span[@class='stat-title']").text
+            if boxname == 'Miscellaneous':
+                misc_box = boxes[boxindex]
+                break
+        else:
+            misc_box = None
+    return game_box, misc_box
+
+def parse_overall_stats(game_box, misc_box):
+    wins, games, winrate, losses, ties = None, None, None, None, None
+    if game_box is not None:
+        wins = game_box.xpath(".//text()[. = 'Games Won']/../..")
+        games = game_box.xpath(".//text()[. = 'Games Played']/../..")
+        wins =  utils.parse_int(wins[0][1].text, True) if len(wins) != 0 else 0
+        games =  utils.parse_int(games[0][1].text, True) if len(games) != 0 else None
+
+        # If there is no games we can assume they haven't finished any games as this hero
+        if games is not None:
+            winrate = round((float(wins) / games), 1) if wins is not 0 else 0
+        else:
+            # Quickplay only returns wins so if wins is not 0, return wins
+            wins = None if wins == 0 else wins
+
+    if misc_box is not None:
+        losses = misc_box.xpath(".//text()[. = 'Games Lost']/../..")
+        ties = misc_box.xpath(".//text()[. = 'Games Tied']/../..")
+        losses = utils.parse_int(losses[0][1].text, True) if len(losses) != 0 else None
+        ties = utils.parse_int(ties[0][1].text, True) if len(ties) != 0 else None
+        if games is not None:
+            # Cheaty way of testing if we're not in quickplay, set them to 0 for comp stats
+            losses = losses if losses else 0
+            ties = ties if ties else 0
+
+    return { 'wins': wins, 'win_rate': winrate, 'losses': losses, 'games': games, 'ties': ties }
