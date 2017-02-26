@@ -216,26 +216,21 @@ def parse_hero(parsed):
     return heroes
 
 def find_game_and_misc_boxes(boxes):
-    try:
-        game_box = boxes[6]
-    except IndexError:
-        for boxindex, box in enumerate(boxes):
-            boxname = box.find(".//span[@class='stat-title']").text
-            if boxname == 'Game':
-                game_box = boxes[boxindex]
-                break
-        else:
-            game_box = None
-    try:
-        misc_box = boxes[7]
-    except IndexError:
-        for boxindex, box in enumerate(boxes):
-            boxname = box.find(".//span[@class='stat-title']").text
-            if boxname == 'Miscellaneous':
-                misc_box = boxes[boxindex]
-                break
-        else:
-            misc_box = None
+    for boxindex, box in enumerate(boxes):
+        boxname = box.find(".//span[@class='stat-title']").text
+        if boxname == 'Game':
+            game_box = boxes[boxindex]
+            break
+    else:
+        game_box = None
+
+    for boxindex, box in enumerate(boxes):
+        boxname = box.find(".//span[@class='stat-title']").text
+        if boxname == 'Miscellaneous':
+            misc_box = boxes[boxindex]
+            break
+    else:
+        misc_box = None
     return game_box, misc_box
 
 def parse_overall_stats(game_box, misc_box):
