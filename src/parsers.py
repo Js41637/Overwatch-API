@@ -74,8 +74,6 @@ def parse_game_stats(parsed):
 
     for i, item in enumerate(stats):
         overall_stats, game_stats, average_stats, featured_stats = {}, {}, {}, []
-        game_box, misc_box = find_game_and_misc_boxes(item)
-        overall_stats = parse_overall_stats(game_box, misc_box)
 
         # Fetch Game Stats
         for subbox in item:
@@ -91,6 +89,7 @@ def parse_game_stats(parsed):
 
         # Manually add KPD
         game_stats["kpd"] = round(game_stats["eliminations"] / game_stats["deaths"], 2)
+        overall_stats = parse_overall_stats(game_stats, average_stats)
 
         # Generate Featured Stats
         for astat in average_stats:
@@ -167,9 +166,6 @@ def parse_hero(parsed):
                 hero_box = None
                 startingPos = 0
 
-            game_box, misc_box = find_game_and_misc_boxes(item)
-            overall_stats = parse_overall_stats(game_box, misc_box)
-
             # Fetch Hero Specific Stats
             if hero_box is not None:
                 for hstat in hero_box.findall(".//tbody/tr"):
@@ -193,6 +189,8 @@ def parse_hero(parsed):
                     else:
                         general_stats[name] = amount
 
+            overall_stats = parse_overall_stats(general_stats, average_stats)
+
             # Manually add KPD
             if 'eliminations' in general_stats and 'deaths' in general_stats:
                 general_stats["kpd"] = round(general_stats["eliminations"] / general_stats["deaths"], 2)
@@ -215,47 +213,27 @@ def parse_hero(parsed):
 
     return heroes
 
-def find_game_and_misc_boxes(boxes):
-    for boxindex, box in enumerate(boxes):
-        boxname = box.find(".//span[@class='stat-title']").text
-        if boxname == 'Game':
-            game_box = boxes[boxindex]
-            break
+def parse_overall_stats(stats, averages):
+    wins = stats['games_won'] if 'games_won' in stats else 0
+    games = stats['games_played'] if 'games_played' in stats else None
+    losses = stats['games_lost'] if 'games_lost' in stats else None
+    ties = stats['games_tied'] if 'games_tied' in stats else None
+
+    if games is None:
+        dmg_done = stats['damage_done'] if 'damage_done' in stats else None
+        avg_dmg = averages['damage_done'] if 'damage_done' in averages else None
+
+        if (dmg_done and avg_dmg):
+            games = int(dmg_done // avg_dmg)
+            losses = games - wins
+
+    # If there is no games we can assume they haven't finished any games as this hero
+    if games is not None:
+        winrate = round((float(wins) / games), 1) if int(wins) is not 0 else 0
+        losses = losses if losses else 0
+        ties = ties if ties else 0
     else:
-        game_box = None
-
-    for boxindex, box in enumerate(boxes):
-        boxname = box.find(".//span[@class='stat-title']").text
-        if boxname == 'Miscellaneous':
-            misc_box = boxes[boxindex]
-            break
-    else:
-        misc_box = None
-    return game_box, misc_box
-
-def parse_overall_stats(game_box, misc_box):
-    wins, games, winrate, losses, ties = None, None, None, None, None
-    if game_box is not None:
-        wins = game_box.xpath(".//text()[. = 'Games Won']/../..")
-        games = game_box.xpath(".//text()[. = 'Games Played']/../..")
-        wins =  utils.parse_int(wins[0][1].text, True) if len(wins) != 0 else 0
-        games =  utils.parse_int(games[0][1].text, True) if len(games) != 0 else None
-
-        # If there is no games we can assume they haven't finished any games as this hero
-        if games is not None:
-            winrate = round((float(wins) / games), 1) if wins is not 0 else 0
-        else:
-            # Quickplay only returns wins so if wins is not 0, return wins
-            wins = None if wins == 0 else wins
-
-    if misc_box is not None:
-        losses = misc_box.xpath(".//text()[. = 'Games Lost']/../..")
-        ties = misc_box.xpath(".//text()[. = 'Games Tied']/../..")
-        losses = utils.parse_int(losses[0][1].text, True) if len(losses) != 0 else None
-        ties = utils.parse_int(ties[0][1].text, True) if len(ties) != 0 else None
-        if games is not None:
-            # Cheaty way of testing if we're not in quickplay, set them to 0 for comp stats
-            losses = losses if losses else 0
-            ties = ties if ties else 0
+        winrate = None
+        wins = None if wins == 0 else wins
 
     return { 'wins': wins, 'win_rate': winrate, 'losses': losses, 'games': games, 'ties': ties }
