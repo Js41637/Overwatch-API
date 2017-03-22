@@ -11,6 +11,7 @@ heroes = {
     "mccree":     {"id": "0x02E0000000000042", "name": "McCree", "class": "Assault"},
     "mei":        {"id": "0x02E00000000000DD", "name": "Mei", "class": "Defence"},
     "mercy":      {"id": "0x02E0000000000004", "name": "Mercy", "class": "Support"},
+    "orisa":      {"id": "0x02E000000000013E", "name": "Orisa", "class": "Tank"},
     "pharah":     {"id": "0x02E0000000000008", "name": "Pharah", "class": "Assault"},
     "reaper":     {"id": "0x02E0000000000002", "name": "Reaper", "class": "Assault"},
     "reinhardt":  {"id": "0x02E0000000000007", "name": "Reinhardt", "class": "Tank"},
