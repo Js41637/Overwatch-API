@@ -88,7 +88,11 @@ def parse_game_stats(parsed):
                     game_stats[name] = amount
 
         # Manually add KPD
-        game_stats["kpd"] = round(game_stats["eliminations"] / game_stats["deaths"], 2)
+        if 'eliminations' in game_stats and 'deaths' in game_stats:
+            game_stats["kpd"] = round(game_stats["eliminations"] / game_stats["deaths"], 2)
+        else:
+            general_stats["kpd"] = None
+
         overall_stats = parse_overall_stats(game_stats, average_stats)
 
         # Generate Featured Stats
@@ -220,11 +224,11 @@ def parse_overall_stats(stats, averages):
     ties = stats['games_tied'] if 'games_tied' in stats else None
 
     if games is None:
-        dmg_done = stats['damage_done'] if 'damage_done' in stats else None
-        avg_dmg = averages['damage_done'] if 'damage_done' in averages else None
+        elim_done = stats['eliminations'] if 'eliminations' in stats else None
+        avg_elim = averages['eliminations'] if 'eliminations' in averages else None
 
-        if (dmg_done and avg_dmg):
-            games = int(dmg_done // avg_dmg)
+        if (elim_done and avg_elim):
+            games = int(elim_done // avg_elim)
             losses = games - wins
 
     # If there is no games we can assume they haven't finished any games as this hero
