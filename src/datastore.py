@@ -4,6 +4,7 @@ heroes = {
     "ana":        {"id": "0x02E000000000013B", "name": "Ana", "class": "Support"},
     "bastion":    {"id": "0x02E0000000000015", "name": "Bastion", "class": "Defence"},
     "dva":        {"id": "0x02E000000000007A", "name": "D.Va", "class": "Tank"},
+    "doomfist":   {"id": "0x02E000000000012F", "name": "Doomfist", "class": "Assault"},
     "genji":      {"id": "0x02E0000000000029", "name": "Genji", "class": "Assault"},
     "hanzo":      {"id": "0x02E0000000000005", "name": "Hanzo", "class": "Defence"},
     "junkrat":    {"id": "0x02E0000000000065", "name": "Junkrat", "class": "Defence"},
