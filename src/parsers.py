@@ -1,8 +1,10 @@
+"""Parses all data on a users page"""
 from lxml import etree
 import utils
 import datastore
 
 def parse_stats(page, region, battletag, platform):
+    """Starts off the parsing"""
     data = {}
     parsed = etree.HTML(page)
 
@@ -10,13 +12,14 @@ def parse_stats(page, region, battletag, platform):
     data["stats"] = parse_game_stats(parsed)
     data["stats"]["heroes"] = parse_hero(parsed)
 
-    playtimeData = parse_heroes(parsed)
-    data["stats"]["quickplay"]["playtimes"] = playtimeData["quickplay"]
-    data["stats"]["competitive"]["playtimes"] = playtimeData["competitive"]
+    playtime_data = parse_heroes(parsed)
+    data["stats"]["quickplay"]["playtimes"] = playtime_data["quickplay"]
+    data["stats"]["competitive"]["playtimes"] = playtime_data["competitive"]
 
     return data
 
 def parse_user_data(parsed, region, battletag, platform):
+    """Parses a users user data such as level and comp rank"""
     player = {}
     mast_head = parsed.xpath(".//div[@class='masthead-player']")[0]
 
@@ -42,10 +45,10 @@ def parse_user_data(parsed, region, battletag, platform):
             else:
                 player["compteir"] = None
         else:
-            player.update({ 'compteir': None, 'compteirimg': None })
+            player.update({'compteir': None, 'compteirimg': None})
         player["comprank"] = int(comprank.text) if comprank is not None else None
     else:
-        player.update({ 'comprank': None, 'compteir': None, 'compteirimg': None })
+        player.update({'comprank': None, 'compteir': None, 'compteirimg': None})
 
     # Try and fetch Rank
     rank = mast_head.xpath(".//div[@class='player-level']")[0]
@@ -65,8 +68,12 @@ def parse_user_data(parsed, region, battletag, platform):
 
 # Go through both QuickPlay and Competetive stats
 def parse_game_stats(parsed):
-    # Start with them filled in so if there is no stats for some reason, it keeps the empty objects and stuff
-    data = {"quickplay": {"overall_stats": {}, "game_stats": {}, "featured_stats": []}, "competitive": {"overall_stats": {}, "game_stats": {}, "featured_stats": []}}
+    """Parses all the general game stats"""
+    # Start with them filled in so if there is no stats for some reason it keeps the empty objects and stuff
+    data = {
+        "quickplay": {"overall_stats": {}, "game_stats": {}, "featured_stats": []},
+        "competitive": {"overall_stats": {}, "game_stats": {}, "featured_stats": []}
+    }
     stats = parsed.xpath(".//div[@data-group-id='stats' and @data-category-id='0x02E00000FFFFFFFF']")
 
     if len(stats) == 1:
@@ -81,9 +88,9 @@ def parse_game_stats(parsed):
             for stat in stats:
                 name, value = stat[0].text.lower().replace(" ", "_").replace("_-_", "_"), stat[1].text
                 amount = utils.parse_int(value, False)
-                if 'average' in name.lower():
+                if '_avg' in name.lower():
                     # Don't include average stats in the game_stats, use them for the featured stats section
-                    average_stats[name.replace("_average", "")] = amount
+                    average_stats[name.replace("_avg", "")] = amount
                 else:
                     game_stats[name] = amount
 
@@ -91,7 +98,7 @@ def parse_game_stats(parsed):
         if 'eliminations' in game_stats and 'deaths' in game_stats:
             game_stats["kpd"] = round(game_stats["eliminations"] / game_stats["deaths"], 2)
         else:
-            general_stats["kpd"] = None
+            game_stats["kpd"] = None
 
         overall_stats = parse_overall_stats(game_stats, average_stats)
 
@@ -99,9 +106,9 @@ def parse_game_stats(parsed):
         for astat in average_stats:
             if average_stats[astat] != 0:
                 if astat[:-1] in game_stats:
-                    featured_stats.append({ "name": astat.replace("_", " "), "avg": average_stats[astat], "value": game_stats[astat[:-1]]})
+                    featured_stats.append({"name": astat.replace("_", " "), "avg": average_stats[astat], "value": game_stats[astat[:-1]]})
                 else:
-                    featured_stats.append({ "name": astat.replace("_", " "), "avg": average_stats[astat], "value": game_stats[astat]})
+                    featured_stats.append({"name": astat.replace("_", " "), "avg": average_stats[astat], "value": game_stats[astat.replace('_per_10_min', '')]})
 
         if i == 0:
             data["quickplay"] = {"featured_stats": featured_stats, "game_stats": game_stats, "overall_stats": overall_stats}
@@ -112,17 +119,18 @@ def parse_game_stats(parsed):
 
 # Get playtime each hero for Quickplay and Competitive
 def parse_heroes(parsed):
-    playtimes = { 'quickplay': [], 'competitive': [] }
+    """Parses the playtime for all the heroes"""
+    playtimes = {'quickplay': [], 'competitive': []}
     playtimestats = parsed.xpath(".//div[@data-category-id='overwatch.guid.0x0860000000000021']")
     for i, item in enumerate(playtimestats):
         built_heroes = []
         heroes = item.xpath(".//div[@class='bar-text']")
-        for ii, hero in enumerate(heroes):
+        for j, hero in enumerate(heroes):
             htime = hero.find(".//div[@class='description']").text
             # If the first hero has no playtime then we can assume that none have been played
             # and that they haven't played comp mode so we will ignore all the rest
             if htime == '--':
-                if ii == 0 and i == 1:
+                if j == 0 and i == 1:
                     break
                 else:
                     htime = '0'
@@ -130,7 +138,7 @@ def parse_heroes(parsed):
             cname = hname.replace(".", "").replace(": ", "").replace(u"\xfa", "u").replace(u'\xf6', 'o')
             time = utils.parse_int(htime, False)
 
-            built_heroes.append({ 'name': hname, 'time': time, 'extended': '/hero/' + cname.lower() })
+            built_heroes.append({'name': hname, 'time': time, 'extended': '/hero/' + cname.lower()})
 
         if i == 0:
             playtimes['quickplay'] = built_heroes
@@ -141,13 +149,17 @@ def parse_heroes(parsed):
 
 # Get individual hero data for every hero and their Quickplay and Competitive stats
 def parse_hero(parsed):
+    """Goes through every hero and parses their game stats"""
     heroes = {}
     for key, hero in datastore.heroes.items():
         stats = parsed.xpath(".//div[@data-group-id='stats' and @data-category-id='{0}']".format(hero["id"]))
         heroes[key] = {
             "name": hero["name"],
             "class": hero["class"],
-            "stats": {"quickplay": {"featured_stats": [], "general_stats": {}, "overall_stats": {}, "hero_stats": {}}, "competitive": {"featured_stats": [], "general_stats": {}, "overall_stats": {}, "hero_stats": {}}}
+            "stats": {
+                "quickplay": {"featured_stats": [], "general_stats": {}, "overall_stats": {}, "hero_stats": {}},
+                "competitive": {"featured_stats": [], "general_stats": {}, "overall_stats": {}, "hero_stats": {}}
+            }
         }
 
         if len(stats) == 0:
@@ -159,37 +171,41 @@ def parse_hero(parsed):
             heroes[key]["stats"]["competitive"]["is_empty"] = True
 
         # Go through both QuickPlay and Competetive stats
-        for statsIndex, item in enumerate(stats):
+        for stats_index, item in enumerate(stats):
             hero_stats, general_stats, overall_stats, average_stats, featured_stats = {}, {}, {}, {}, []
 
-            hbtitle = item[0].find(".//span[@class='stat-title']").text
+            try:
+                hbtitle = item[0].find(".//h5[@class='stat-title']").text
+            except AttributeError:
+                hbtitle = item[0].find(".//span[@class='stat-title']").text
+
             if hbtitle == 'Hero Specific':
                 hero_box = item[0]
-                startingPos = 1
+                starting_pos = 1
             else:
                 hero_box = None
-                startingPos = 0
+                starting_pos = 0
 
             # Fetch Hero Specific Stats
             if hero_box is not None:
                 for hstat in hero_box.findall(".//tbody/tr"):
                     name, value = hstat[0].text.lower().replace(" ", "_").replace("_-_", "_"), hstat[1].text
                     amount = utils.parse_int(value, False)
-                    if 'average' in name.lower():
+                    if '_avg' in name.lower():
                         # Don't include average stats in the general_stats, use them for the featured stats section
-                        average_stats[name.replace("_average", "")] = amount
+                        average_stats[name.replace("_avg", "")] = amount
                     else:
                         hero_stats[name] = amount
 
             # Fetch General Hero Stats
-            for subbox in item[startingPos:]:
+            for subbox in item[starting_pos:]:
                 stats = subbox.findall(".//tbody/tr")
                 for stat in stats:
                     name, value = stat[0].text.lower().replace(" ", "_").replace("_-_", "_"), stat[1].text
                     amount = utils.parse_int(value, False)
-                    if 'average' in name.lower():
+                    if '_avg' in name.lower():
                         # Don't include average stats in the general_stats, use them for the featured stats section
-                        average_stats[name.replace("_average", "")] = amount
+                        average_stats[name.replace("_avg", "")] = amount
                     else:
                         general_stats[name] = amount
 
@@ -208,16 +224,21 @@ def parse_hero(parsed):
                         val = hero_stats[astat]
                     else:
                         val = general_stats[astat]
-                    featured_stats.append({ "name": astat.replace("_", " "), "avg": average_stats[astat], "value": val})
+                    featured_stats.append({"name": astat.replace("_", " "), "avg": average_stats[astat], "value": val})
 
-            if statsIndex == 0:
-                heroes[key]["stats"]["quickplay"] = {"featured_stats": featured_stats, "general_stats": general_stats, "overall_stats": overall_stats, "hero_stats": hero_stats}
+            if stats_index == 0:
+                heroes[key]["stats"]["quickplay"] = {
+                    "featured_stats": featured_stats, "general_stats": general_stats, "overall_stats": overall_stats, "hero_stats": hero_stats
+                }
             else:
-                heroes[key]["stats"]["competitive"] = {"featured_stats": featured_stats, "general_stats": general_stats, "overall_stats": overall_stats, "hero_stats": hero_stats}
+                heroes[key]["stats"]["competitive"] = {
+                    "featured_stats": featured_stats, "general_stats": general_stats, "overall_stats": overall_stats, "hero_stats": hero_stats
+                }
 
     return heroes
 
 def parse_overall_stats(stats, averages):
+    """Parses the overall stats page"""
     wins = stats['games_won'] if 'games_won' in stats else 0
     games = stats['games_played'] if 'games_played' in stats else None
     losses = stats['games_lost'] if 'games_lost' in stats else None
@@ -227,7 +248,7 @@ def parse_overall_stats(stats, averages):
         elim_done = stats['eliminations'] if 'eliminations' in stats else None
         avg_elim = averages['eliminations'] if 'eliminations' in averages else None
 
-        if (elim_done and avg_elim):
+        if elim_done and avg_elim:
             games = int(elim_done // avg_elim)
             losses = games - wins
 
@@ -240,4 +261,4 @@ def parse_overall_stats(stats, averages):
         winrate = None
         wins = None if wins == 0 else wins
 
-    return { 'wins': wins, 'win_rate': winrate, 'losses': losses, 'games': games, 'ties': ties }
+    return {'wins': wins, 'win_rate': winrate, 'losses': losses, 'games': games, 'ties': ties}
